@@ -1,0 +1,103 @@
+---
+title: "autoQC report"
+author: "SIgN_GM"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(cache=FALSE)
+opts_chunk$set(fig.align='center', out.width='750px', dpi=200)  #out.width='750px', dpi=200
+#opts_chunk$set(dev = 'pdf')
+```
+
+## AutoQuality Control Report
+
+> Input File Name: `r filename`    
+> Number of Cells: `r as.integer(dim(set[[i]])[1])`  
+> The anomalies were removed from:  `r analysis`   
+> Anomalies Detected in total: **`r totalBadPerc * 100`** %  
+
+
+### Number of cells in each FCS file:
+
+If the number of FCS files is higher than 3, a histogram reports the number of
+cells for each FCS file of the dataset. In blue is highlighted the FCS file 
+whose quality control analysis is described in this report.
+
+
+```{r, echo=FALSE, fig.height = 3}
+if(length(set) >= 3 ){
+  flow_set_plot(N_cell_set, area)
+}
+```
+
+
+### Flow Rate Check
+
+> **`r FlowRateQC$res_fr_QC$badPerc * 100`** % Anomalies Detected in the Flow Rate Check.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = 4, fig.width= 10}
+    flow_rate_plot(FlowRateQC) 
+```
+
+The plot reconstructs the flow rate with a resolution of 1/10 of a second. Anomalies in the flow rate have been detected with an algorithm based on the ESD outlier detection method and modified to work on seasonality data. The anomalies automatically detected are circled in green.
+
+### Signals' Channel Check
+
+> **`r FlowSignalQC$Perc_bad_cells$badPerc_tot * 100`** % Anomalies Detected in the Flow Signal Check. 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = h_FS_graph}
+flow_signal_plot(FlowSignalQC)
+```
+
+The more stable region selected is highlighted in yellow. If the outlier removal has been required before the changepoint analysis, then the detected outliers are cicled in green.
+
+The FCS file was divided in `r FlowSignalData$bins` segments. The region more stable among all the channel is between the segment `r FlowSignalQC$segm[1]` and `r FlowSignalQC$segm[2]`.
+
+##### More info on the changepoints detected:
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+if(!is.null(FlowSignalQC$tab_cpt)){
+     cat("Channels where shifts in signal intensities were detected with corresping changepoints:  \n")
+}else{
+  cat("No changepoints were detected.  \n")
+}
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4}
+if(!is.null(FlowSignalQC$tab_cpt)){
+     cat("Channels where shifts in signal intensities were detected with corresping changepoints:  \n")
+   as.data.frame(FlowSignalQC$tab_cpt )
+}
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4, results = 'asis'}
+if(!is.null(FlowSignalQC$ch_no_cpt) && length(FlowSignalQC$ch_no_cpt) != 0 ){
+  cat("Channels where no changepoints were detected: \n")
+}
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4}
+if(!is.null(FlowSignalQC$ch_no_cpt) && length(FlowSignalQC$ch_no_cpt) != 0 ){
+  paste(FlowSignalQC$ch_no_cpt, collapse = ", ")
+}
+```
+
+### Margin Events Check
+
+> **`r FlowMarginQC$badPerc * 100`** % Anomalies Detected in Margin Events Check.  
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = 4, fig.width= 10}
+flow_margin_plot(FlowMarginQC, FSbinSize)
+```
+
+The plot shows where the margin events occur mostly. The x-axis scale is complementary to the one of the Flow Signal plot.
+
+##### More info on the margin events detected:
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+FlowMarginQC$margin_events
+```
+
+The table shows the number of cells that did not pass the check for each channel.
+
