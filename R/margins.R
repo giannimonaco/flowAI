@@ -5,7 +5,7 @@ flow_margin_check <- function(x,  margin_channels = NULL,
                       side = "both") {
 
   if (is.null(margin_channels)) {
-    teCh <- grep("Time|time|Event|event", colnames(x), value = TRUE)
+    teCh <- grep("Time|time|TIME|Event|event|EVENT", colnames(x), value = TRUE)
     parms <- setdiff(colnames(x), teCh)
   } else {
     if (!all(margin_channels %in% colnames(x)))
@@ -88,11 +88,7 @@ flow_margin_check <- function(x,  margin_channels = NULL,
   goodCellIDs <- setdiff(xx, badCellIDs)
   badPerc <- round(length(badCellIDs)/lenx, 2)
 
-  if (badPerc > 0.5) {
-    warning(paste0(100 * badPerc, "%", " of cells are detected as margin events \n"))
-  } else {
-    cat(paste0(100 * badPerc, "%", " of cells are detected as margin events \n"))
-  }
+  cat(paste0(100 * badPerc, "% of anomalous cells detected in the dynamic range margins. \n"))
 
   params <- parameters(x)
   keyval <- keyword(x)
@@ -132,25 +128,25 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
         ymax <- max(lowline, upline)
         plot(lowline, type ="l", col = "blue", bty ="n",
             ylim = c(0, ymax), xlab = "segment ID",
-            ylab = "Number of cells removed" )
+            ylab = "Number of cells removed", cex.lab=1 )
         lines(upline, col = "red")
-        legend("top", c("Negative Outliers", "Upper Margine Events"), lty = 1,bty = "n", cex = 0.7,
+        legend("top", c("Negative Outliers", "Upper Margine Events"), lty = 1,bty = "n", cex = 1,
             col = c("blue", "red"))
     }else if( length(bad_lowerIDs) != 0 & length(bad_upperIDs) == 0){
         lowline <- sapply(tmpx, function(x){
             length(which(bad_lowerIDs %in% x))
         })
         plot(lowline, type ="l", col = "blue", bty ="n", xlab = "segment ID",
-            ylab = "Number of cells removed" )
-        legend("top", c("Negative Outliers"), lty = 1,bty = "n", cex = 0.7,
+            ylab = "Number of cells removed", cex.lab=1 )
+        legend("top", c("Negative Outliers"), lty = 1,bty = "n", cex = 1,
             col = "blue")
     }else if( length(bad_lowerIDs) == 0 & length(bad_upperIDs) != 0){
         upline <- sapply(tmpx, function(x){
             length(which(bad_upperIDs %in% x))
         })
         plot(upline, type ="l", col = "red", bty ="n", xlab = "segment ID",
-            ylab = "Number of cells removed" )
-        legend("top", c("Upper Margine Events"), lty = 1,bty = "n", cex = 0.7,
+            ylab = "Number of cells removed", cex.lab=1 )
+        legend("top", c("Upper Margine Events"), lty = 1,bty = "n", cex = 1,
             col = "red")
     }
 }

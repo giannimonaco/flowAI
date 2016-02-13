@@ -38,24 +38,40 @@ if(length(set) >= 3 ){
 > **`r FlowRateQC$res_fr_QC$badPerc * 100`** % Anomalies Detected in the Flow Rate Check.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = 4, fig.width= 10}
-    flow_rate_plot(FlowRateQC) 
+  if (length(nchar(timeCh)) != 0 && !is.null(timeCh)) {   
+        flow_rate_plot(FlowRateQC) 
+} 
 ```
 
-The plot reconstructs the flow rate with a resolution of 1/10 of a second. Anomalies in the flow rate have been detected with an algorithm based on the ESD outlier detection method and modified to work on seasonality data. The anomalies automatically detected are circled in green.
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+  if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {   
+        cat("It was not possible to analyse the flow rate since the \"Time\" channel was missing. \n")
+   }
+```
+
+The plot reconstructs the flow rate with a resolution of 1/`r 1/second_fractionFR` of a second. Anomalies in the flow rate have been detected with an algorithm based on the ESD outlier detection method. The anomalies automatically detected are circled in green.
 
 ### Signals' Channel Check
 
 > **`r FlowSignalQC$Perc_bad_cells$badPerc_tot * 100`** % Anomalies Detected in the Flow Signal Check. 
 
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+  if (outlierFS) { 
+        cat(paste0("Outliers were removed before the changepoint analysis.", FlowSignalQC$Perc_bad_cells$badPerc_out * 100, "% of anomalies were detected as outliers and ", FlowSignalQC$Perc_bad_cells$badPerc_cp *100, " of anomalies were detected in the changepoint analysis. \n"))
+   }
+```
+
+
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = h_FS_graph}
 flow_signal_plot(FlowSignalQC)
 ```
 
-The more stable region selected is highlighted in yellow. If the outlier removal has been required before the changepoint analysis, then the detected outliers are cicled in green.
+The more stable region selected consistent for all channels is highlighted in yellow. If the outlier removal has been required before the changepoint analysis, then the detected outliers are cicled in green.
 
-The FCS file was divided in `r FlowSignalData$bins` segments. The region more stable among all the channel is between the segment `r FlowSignalQC$segm[1]` and `r FlowSignalQC$segm[2]`.
+The FCS file was divided in `r FlowSignalData$bins` segments. The stable region is located between the segment `r FlowSignalQC$segm[1]` and `r FlowSignalQC$segm[2]`.
 
 ##### More info on the changepoints detected:
+
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
 if(!is.null(FlowSignalQC$tab_cpt)){
      cat("Channels where shifts in signal intensities were detected with corresping changepoints:  \n")
@@ -66,20 +82,19 @@ if(!is.null(FlowSignalQC$tab_cpt)){
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4}
 if(!is.null(FlowSignalQC$tab_cpt)){
-     cat("Channels where shifts in signal intensities were detected with corresping changepoints:  \n")
    as.data.frame(FlowSignalQC$tab_cpt )
+}
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+if(!is.null(ChRemoveFS)){
+     cat(paste0("Channels excluded from the analysis: ", paste(ChannelRemovedFS, collapse = ", "), ". \n"))
 }
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4, results = 'asis'}
 if(!is.null(FlowSignalQC$ch_no_cpt) && length(FlowSignalQC$ch_no_cpt) != 0 ){
-  cat("Channels where no changepoints were detected: \n")
-}
-```
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4}
-if(!is.null(FlowSignalQC$ch_no_cpt) && length(FlowSignalQC$ch_no_cpt) != 0 ){
-  paste(FlowSignalQC$ch_no_cpt, collapse = ", ")
+  cat(paste0("Channels where no changepoints were detected: ", paste(FlowSignalQC$ch_no_cpt, collapse = ", "), ". \n"))
 }
 ```
 

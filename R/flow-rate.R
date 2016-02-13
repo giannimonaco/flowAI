@@ -38,25 +38,20 @@ flow_rate_bin <- function(x, second_fraction = 0.1, timeCh = timeCh,
 
 # Detection of anomalies in the flow rate using the algorithm
 # implemented in the package AnomalyDetection.
-flow_rate_check <- function(x, FlowRateData,
-        long_period = long_period, period = period , alpha = alpha) {
+flow_rate_check <- function(x, FlowRateData, alpha = alpha, use_decomp = use_decomp) {
+    
   fr_frequences <- FlowRateData$frequencies
   fr_cellBinID <- FlowRateData$cellBinID
   second_fraction <- FlowRateData$info["second_fraction"]
 
-    long_period_obs <- round(nrow(fr_frequences)/long_period)
-    period_obs <- ceiling(long_period_obs/period)
 
   if (length(unique(fr_frequences[, 2])) == 1) {
     fr_autoqc <- NULL
   } else {
-    fr_autoqc <- anomaly_detection(fr_frequences[, "tbCounts"],
-                 max_anoms = 0.4, period = period_obs, direction = "both",
-                 longterm_period = long_period_obs, alpha = alpha)
+    fr_autoqc <- anomaly_detection(fr_frequences[, "tbCounts"], alpha = alpha, use_decomp = use_decomp)
   }
 
   if (is.null(fr_autoqc) || is.null(fr_autoqc$anoms)) {
-    cat("NO abnormal cell detected in time flow check!", fill = TRUE)
     badPerc <- 0
     newx <- x
     goodCellIDs <- fr_cellBinID$cellID
@@ -65,24 +60,18 @@ flow_rate_check <- function(x, FlowRateData,
     goodCellIDs <- fr_cellBinID$cellID[!(fr_cellBinID$binID %in% fr_autoqc$anoms$index)]
     badCellIDs <- setdiff(fr_cellBinID$cellID, goodCellIDs)
     badPerc <- round(1 - (length(goodCellIDs)/nrow(fr_cellBinID)), 2)
-    if (badPerc > 0.5) {
-      warning(paste0(100 * badPerc, "%", " of cells are detected as abnormal cells in the flow rate check. \n"))
-    } else {
-      cat(paste0(100 * badPerc, "%", " of cells are detected as abnormal cells in the flow rate check. \n"))
-    }
-
     params <- parameters(x)
     keyval <- keyword(x)
     sub_exprs <- exprs(x)
     sub_exprs <- sub_exprs[goodCellIDs, ]
     newx <- flowFrame(exprs = sub_exprs, parameters = params, description = keyval)
   }
+  cat(paste0(100 * badPerc, "% of anomalous cells detected in the flow rate check. \n"))
   return(list(anoms = fr_autoqc$anoms, frequencies = fr_frequences,
               FRnewFCS = newx,
               goodCellIDs = goodCellIDs, badCellIDs = badCellIDs,
               res_fr_QC = data.frame(second_fraction = second_fraction,
-                num_obs = fr_autoqc$num_obs, period_obs = period_obs,
-                period =period, badPerc = badPerc)))
+              num_obs = fr_autoqc$num_obs, badPerc = badPerc)))
 }
 
 
@@ -92,24 +81,15 @@ flow_rate_plot <- function(FlowRateQC) {
 
   second_fraction <- FlowRateQC$res_fr_QC$second_fraction
   num_obs = FlowRateQC$res_fr_QC$num_obs
-  period_obs = FlowRateQC$res_fr_QC$period_obs
-  period = FlowRateQC$res_fr_QC$period
   frequencies = as.data.frame(FlowRateQC$frequencies)
   anoms = as.data.frame(FlowRateQC$anoms)
   anoms_points = as.data.frame(cbind(sec_anom = frequencies$secbin[anoms$index], count_anom = anoms$anoms))
 
 
-    lines_period <- seq(1, num_obs, period_obs)
-    lines_long_period <- lines_period[seq(1, length(lines_period),
-                          period)]
-
     xgraph <- ggplot(frequencies, aes_string(x="secbin", y="tbCounts")) +
               theme_bw() + theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
               text=element_text(size = 14)) + geom_line(colour = "red" )
-   # xgraph <- xgraph + scale_x_continuous(breaks=frequencies$minbin[lines_at],
-   #           expand=c(0,0))
-    xgraph <- xgraph + geom_vline(xintercept=frequencies$secbin[lines_long_period], color="gray60") + geom_vline(xintercept=frequencies$secbin[lines_period], linetype = 2, color="gray60")
     xgraph <- xgraph + labs(x= "Seconds", y= paste0("Number of cells per 1/",
               1  /second_fraction, " of a second"), title= "Flow Rate")
 

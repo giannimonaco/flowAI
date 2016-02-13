@@ -15,4 +15,7 @@ to check anomalies in the 1) flow rate, 2) signal acquisition, 3) dynamic range.
 \examples{
 if (interactive()) flowAI::flow_iQC()
 }
+\author{
+Chen Hao
+}
 

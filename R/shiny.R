@@ -4,6 +4,7 @@
 #' app. The quality control framework of the Shiny app is equivalent to the
 #' one of the \code{flow_auto_qc} function. It is composed of three main steps that allow
 #' to check anomalies in the 1) flow rate, 2) signal acquisition, 3) dynamic range.
+#' @author Chen Hao
 #' @import RColorBrewer
 #' @export
 #' @examples if (interactive()) flowAI::flow_iQC()

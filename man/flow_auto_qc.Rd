@@ -4,12 +4,12 @@
 \alias{flow_auto_qc}
 \title{Automatic quality control on .fcs files.}
 \usage{
-flow_auto_qc(fcsfiles, remove_from = "all", highQ_suffix = NULL,
-  report = TRUE, report_suffix = NULL, save_highQ = TRUE,
-  save_lowQ = TRUE, lowQ_suffix = NULL, timeCh = NULL,
-  second_fractionFR = 0.1, long_periodFR = 1, periodFR = 30,
-  alphaFR = 0.05, ChRemoveFS = NULL, outlierFS = FALSE,
-  pen_valueFS = 200, max_cptFS = 3, ChFM = NULL, sideFM = "both")
+flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
+  second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
+  ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200,
+  max_cptFS = 3, ChFM = NULL, sideFM = "both", html_report = "_QC",
+  mini_report = "QCmini", fcs_highQ = "_HighQ", fcs_lowQ = FALSE,
+  folder_results = "resultsQC")
 }
 \arguments{
 \item{fcsfiles}{It can be a character vector with the filenames of the .fcs files,
@@ -22,30 +22,6 @@ The abbreviation \emph{FR} commands the QC for flow rate,
 \emph{FS} commands the QC for signal acquisition, and \emph{FM} commands
 the QC for the margins of the dynamic range.}
 
-\item{highQ_suffix}{Character string to add to the original filenames
-to name the new .fcs files containing the cells that passed the quality control.
-The default is \code{NULL}, that automatically adds the suffix \emph{_highQ}
-to the original name.}
-
-\item{report}{logical indicating whether the report has to be released.
-The default is \code{TRUE}.}
-
-\item{report_suffix}{Character string to adds to the original filenames
-to name the reports that will be released by the quality control.
-The default is \code{NULL}, that automatically add the suffix \emph{_reportQC}
-to the original name.}
-
-\item{save_highQ}{logical indicating whether the high quality .fcs files have to be
-saved. The default is \code{TRUE}.}
-
-\item{save_lowQ}{logical indicating whether the low quality .fcs files have to be
-saved. The default is \code{TRUE}.}
-
-\item{lowQ_suffix}{Character string to add to the original filenames
-to name the new .fcs files containing the cells that did not pass the quality control.
-The default is \code{NULL}, that automatically adds the suffix \emph{_LowQ}
-to the original name.}
-
 \item{timeCh}{Character string corresponding to the name of the Time Channel
 in the set of .fcs files. By default is \code{NULL} and the name is retrieved
 automatically.}
@@ -53,23 +29,23 @@ automatically.}
 \item{second_fractionFR}{The fraction of a second that is used to split
 the time channel to recreate the flow rate. The fraction used by default is 1/10 of a second.}
 
-\item{long_periodFR}{An integer indicating the number of sections the flow rate
-should be split into and indipendently analysed. The default setting is \code{1}
-and the flow rate is analyzed in its entirety.}
-
-\item{periodFR}{An integer that indicates the number of segments a long period
-in the flow rate has to be split into in order for the anomaly to be detected.
-The default value is \code{30}.}
-
 \item{alphaFR}{The level of statistical significance used to
-accept anomalies. The default value is \code{0.05}.}
+accept anomalies detected by the ESD method. The default value is \code{0.01}.}
+
+\item{decompFR}{Logical indicating whether the flow rate should be decomposed 
+in the trend and cyclic components. Default is \code{TRUE} and the ESD 
+outlier detection will be done on the trend component penalized with the 
+magnitude of the cyclic component. If it is \code{FALSE} the ESD outlier 
+detection will be done on the original flow rate.}
 
 \item{ChRemoveFS}{Add a character vector with the names or
 the pattern of the names of the channels that you do not want to include
-in the signal quality control. The default option is \code{NULL}. If you want
-to exclude the scatter parameters from the analysis use \code{c("FCS", "SSC")}.}
+in the signal quality control. The default option excludes the 
+scatter parameters using \code{c("FSC", "SSC")}. If you want
+to include all the  parameters in the analysis use \code{NULL}.}
 
-\item{outlierFS}{logical indicating whether to remove outliers from the intensity values
+\item{outlierFS}{logical indicating whether to remove outliers from 
+the intensity values
 before performing the changepoint analysis. The default is \code{FALSE}.}
 
 \item{pen_valueFS}{The value of the penalty for the changepoint detection
@@ -89,6 +65,29 @@ option is \code{NULL} and with it all the channels are selected for the analysis
 \item{sideFM}{Select if the checking of the dynamic range should be performed in the
 lower side, upper side or both sides of the acquitision range. Choose between:
 \code{'both' | 'upper' | 'lower'}. The default value is \code{both}.}
+
+\item{html_report}{Character string that will be added to the filename of the 
+fcs analyzed to name a html document reporting the results of the quality control. 
+The default is \code{"_QC"}. If you do not want to generate a report 
+use \code{FALSE}.}
+
+\item{mini_report}{create a .txt file with the percentage of anomalies detected in 
+each .fcs file analysed. The default is \code{"_QCmini"}. If you prefer not to generate 
+the mini report use \code{FALSE}.}
+
+\item{fcs_highQ}{Character string that will be added to the filename of the 
+fcs analyzed to name the new .fcs file that will be generated containing only the 
+cells that passed the quality control. The default is \code{"_HighQ"}. If you do not 
+want to generate a new .fcs file use \code{FALSE}.}
+
+\item{fcs_lowQ}{Character string that will be added to the filename of the 
+fcs analyzed to name the new .fcs file that will be generated containing only the 
+cells that do not passed the quality control. By default the .fcs file is not 
+generated and the argument is set as \code{FALSE}}
+
+\item{folder_results}{Character string for the name of the directory that will contain 
+the results. The default is \code{"resultsQC"}. If you intend return the results 
+in the main directory use \code{FALSE}.}
 }
 \value{
 It will return the .fcs files containing only the cells that
@@ -108,10 +107,10 @@ signal acquisition and in the dynamic range.
 data(Bcells)
 
 ## quality control
-flow_auto_qc(Bcells[[1]], report = FALSE,  save_highQ = FALSE, save_lowQ = FALSE)
+flow_auto_qc(Bcells[[1]], html_report = FALSE, fcs_highQ = FALSE, folder_results = FALSE)
 
 }
 \author{
-Gianni Monaco with substantial contribution from Chen Hao
+Gianni Monaco
 }
 

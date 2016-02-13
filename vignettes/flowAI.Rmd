@@ -56,17 +56,37 @@ The automatic method is implemented in the function `flow_auto_qc`.
 The following calls show how to perform the quality control with default 
 options on the .fcs files contained in your folder and in the dataset contained 
 in the FlowAI packages.
+The flowAI package depends on the flowCore package to handle .fcs files in the R environment. The flowCore package provides two main classes, `flowFrame` and `flowSet`. The `Bcells` object is an instance of the `flowSet` class and it contain a set of three .fcs files that taken singuarly are instances of the `flowFrame` object.  The `flow_auto_qc` function can be called on either one of the flowCore objects, `flowSet` and `flowFrame`, and on a character vector of the fcs files:
 
 ```{r, eval=FALSE}
-flow_auto_qc(fcsfiles)
 flow_auto_qc(Bcells)
+flow_auto_qc(Bcells[[1]])
+flow_auto_qc(fcsfiles)
+```
+
+When a character vector is used to call the `flow_auto_qc` function, a `flowSet` object is automatically generated, since the creation of the histogram for the cell number comparison depends on it. 
+Therefore, to avoid memory saturation, we suggest to split large datasets in batches that are compatible with the hardware specifications of your computer system.
+For example if you wanted batches of maximum 2 gigabytes:
+```{r, eval=FALSE}
+GbLimit <- 2    # decide the limit in gigabyte your batch of .fcs has to have
+size_fcs<-file.size(fcsfiles)/1024/1024/1024    # it calculates the size in gigabytes for each .fcs file
+groups <- ceiling(sum(size_fcs)/GbLimit)
+cums <- cumsum(size_fcs)
+batches <- cut(cums, groups) 
+```
+
+Then you can run your analysis on the batches using a for loop:
+```{r, eval=FALSE}
+for(i in 1:groups){
+    flow_auto_qc(fcsfiles[which(batches == levels(batches)[i])]) 
+}
 ```
 
 #### Interactive method
 The interactive method is implemented as a Shiny app and is executed through 
 the `flow_iQC()` command on the R environment. 
 For perfomance and clearness reasons, it allows to analyze one file at a time.
-Once you open the Shiny app on your web browser, you can upload the .fcs file from the top part of the side panel on the left. 
+Once you open the Shiny app on your web browser, you can upload the .fcs file from the top part of the left hand side panel. 
 
 
 ## Quality control

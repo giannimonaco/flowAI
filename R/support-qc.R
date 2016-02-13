@@ -1,6 +1,6 @@
 # Guess which channel captures time in a exprs, flowFrame or flowset
 findTimeChannel <- function(xx, strict = FALSE) {
-  time <- grep("^Time$", colnames(xx), value = TRUE, ignore.case = TRUE)[1]
+  time <- grep("^Time$|^TIME$|^time$", colnames(xx), value = TRUE, ignore.case = TRUE)[1]
   if (is.na(time)) {
     if (is(xx, "flowSet") || is(xx, "ncdfFlowList"))
       xx <- exprs(xx[[1]]) else if (is(xx, "flowFrame"))

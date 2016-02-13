@@ -21,7 +21,11 @@ flow_signal_bin <- function(x, channels = NULL, binSize = 500,
 
   ### Retriving time and expression info
   exp <- exprs(x)
-  timex <- exp[, timeCh]
+  if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {
+      timex <- seq(from = 0, length.out = nrow(x), by = 0.1)
+  }else{
+    timex <- exp[, timeCh]
+  }
   yy <- exp[, parms]  # channels data
   idx <- c(1:nrow(x))
   seconds <- timex * timestep
@@ -50,7 +54,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
 
   fs_cellBinID <- FlowSignalData$cellBinID
   fs_res <- FlowSignalData$exprsBin
-  teCh <- grep("Time|time|Event|event", colnames(fs_res), value = TRUE)
+  teCh <- grep("Time|time|TIME|Event|event|EVENT", colnames(fs_res), value = TRUE)
   parms <- setdiff(colnames(fs_res), teCh)
 
   ##### scale and sum the value of each channel and find the outliers
@@ -63,8 +67,8 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   if (!is.null(ChannelRemove)) {
     ChannelRemove_COMP <- grep(paste(ChannelRemove, collapse="|"),
                       colnames(fs_res), value = TRUE)
-    cat(paste("The channel removed from the flow signal check are: ",
-      paste(ChannelRemove_COMP, collapse = ", ")))
+    cat(paste0("The channel removed from the signal check are: ",
+      paste(ChannelRemove_COMP, collapse = ", "), ". \n"))
     parms <- setdiff(parms, ChannelRemove_COMP)
   }
 
@@ -77,10 +81,10 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
         return(x)
       })
       badPerc_out <- round((length(FS_out)/nrow(fs_res)),2)
-      cat(paste0(badPerc_out*100, "% of outliers found in channels' signal. \n"))
+      cat(paste0(badPerc_out * 100, "% of outliers found in channels' signal. \n"))
     }else{
       fs_res_adj <- fs_res[,parms]
-      cat( "No outliers found in channels' signal.",  fill = TRUE)
+      cat("0% of outliers found in channels' signal. \n")
       badPerc_out <- 0
     }
 
@@ -114,22 +118,22 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   list_seg <- lapply(list_seg, function(x) setdiff(x, nrow(fs_res)))
 
   len_cpt <- sapply(list_seg, length)
+  nam_cpt <- gsub("<|>","",names(len_cpt))
   nozero_cpt <- as.numeric(which(len_cpt != 0))
   zero_cpt <- as.numeric(which(len_cpt == 0))
   if(length(nozero_cpt) == 0){
-    cat("No changepoints detected.", fill = TRUE)
-    ch_no_cpt <- names(len_cpt[zero_cpt])
+    ch_no_cpt <- nam_cpt[zero_cpt]
     tab_cpt <- NULL
   }else{
     cat(paste("Changepoint(s) detected in the channels: ",
     paste(names(len_cpt[nozero_cpt]), collapse = ", "), sep = ""), fill = TRUE)
     ch_cpt <- list_seg[nozero_cpt]
-    ch_no_cpt <- names(len_cpt[zero_cpt])
+    ch_no_cpt <- nam_cpt[zero_cpt]
 
     max_n_cpt <- max(sapply(ch_cpt, length))
     tab_cpt <- ldply(ch_cpt, function(x) c(x, rep(NA, max_n_cpt - length(x))),
       .id = NULL)
-    rownames(tab_cpt) <- names(len_cpt[nozero_cpt])
+    rownames(tab_cpt) <- nam_cpt[nozero_cpt]
     tab_cpt <- as.matrix(tab_cpt)
     tab_cpt[which(is.na(tab_cpt))] <- ""
     colnames(tab_cpt) <- 1:length(tab_cpt[1, ])
@@ -137,13 +141,8 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   # percentage bad cell detected with the changepoint method
   badPerc_cp <- round(1 - ((max_seg[2] - max_seg[1])/(length(fs_res[, 1]) - 1)),2)
 
-  if (badPerc_cp == 0) {
-    cat("NO abnormal cells detected in flow signal check!", fill = TRUE)
-  } else if (badPerc_cp > 0.5) {
-    cat(paste0(100 * badPerc_cp, "% of cells are detected as abnormal cells. \n "))
-  } else {
-    cat(paste0(100 * badPerc_cp, "% of cells are detected as abnormal cells."), fill = TRUE)
-  }
+  cat(paste0(100 * badPerc_cp, "% of anomalous cells detected in signal check. \n"))
+ 
   # retrieve ID of good cells
   if(outlier_remove){
     fs_cellBinID <- fs_cellBinID[which(!fs_cellBinID[, 2] %in% FS_out),]
