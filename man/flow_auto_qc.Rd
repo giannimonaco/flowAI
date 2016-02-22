@@ -2,7 +2,7 @@
 % Please edit documentation in R/auto-qc.R
 \name{flow_auto_qc}
 \alias{flow_auto_qc}
-\title{Automatic quality control on .fcs files.}
+\title{Automatic quality control on FCS files.}
 \usage{
 flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
   second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
@@ -12,7 +12,7 @@ flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
   folder_results = "resultsQC")
 }
 \arguments{
-\item{fcsfiles}{It can be a character vector with the filenames of the .fcs files,
+\item{fcsfiles}{It can be a character vector with the filenames of the FCS files,
 a flowSet or a flowFrame.}
 
 \item{remove_from}{Decide which steps have to be considered for the removal of
@@ -23,7 +23,7 @@ The abbreviation \emph{FR} commands the QC for flow rate,
 the QC for the margins of the dynamic range.}
 
 \item{timeCh}{Character string corresponding to the name of the Time Channel
-in the set of .fcs files. By default is \code{NULL} and the name is retrieved
+in the set of FCS files. By default is \code{NULL} and the name is retrieved
 automatically.}
 
 \item{second_fractionFR}{The fraction of a second that is used to split
@@ -51,7 +51,7 @@ before performing the changepoint analysis. The default is \code{FALSE}.}
 \item{pen_valueFS}{The value of the penalty for the changepoint detection
 algorithm. This can be a numeric value or text giving the formula to use,
 for instance it is possible to use the character string "1.5*log(n)",
-where n indicates the number of cells in the .fcs file. The higher the
+where n indicates the number of cells in the FCS file. The higher the
 penalty value the less strict is the detection of the anomalies.
 The default value is \code{200}.}
 
@@ -71,18 +71,18 @@ fcs analyzed to name a html document reporting the results of the quality contro
 The default is \code{"_QC"}. If you do not want to generate a report 
 use \code{FALSE}.}
 
-\item{mini_report}{create a .txt file with the percentage of anomalies detected in 
-each .fcs file analysed. The default is \code{"_QCmini"}. If you prefer not to generate 
+\item{mini_report}{create a text file with the percentage of anomalies detected in 
+each FCS file analysed. The default is \code{"_QCmini"}. If you prefer not to generate 
 the mini report use \code{FALSE}.}
 
 \item{fcs_highQ}{Character string that will be added to the filename of the 
-fcs analyzed to name the new .fcs file that will be generated containing only the 
+fcs analyzed to name the new FCS file that will be generated containing only the 
 cells that passed the quality control. The default is \code{"_HighQ"}. If you do not 
-want to generate a new .fcs file use \code{FALSE}.}
+want to generate a new FCS file use \code{FALSE}.}
 
 \item{fcs_lowQ}{Character string that will be added to the filename of the 
-fcs analyzed to name the new .fcs file that will be generated containing only the 
-cells that do not passed the quality control. By default the .fcs file is not 
+fcs analyzed to name the new FCS file that will be generated containing only the 
+cells that do not passed the quality control. By default the FCS file is not 
 generated and the argument is set as \code{FALSE}}
 
 \item{folder_results}{Character string for the name of the directory that will contain 
@@ -90,14 +90,14 @@ the results. The default is \code{"resultsQC"}. If you intend return the results
 in the main directory use \code{FALSE}.}
 }
 \value{
-It will return the .fcs files containing only the cells that
+It will return the FCS files containing only the cells that
 passed the quality checks. By default it will return a report indicating the cells
 that were removed in the flow rate, signal acquisition over time and anomalous marginal
-events on the dynamic range. It will also return a new .fcs file containing
+events on the dynamic range. It will also return a new FCS file containing
 only the cells that did not pass the quality check.
 }
 \description{
-For a set of .fcs files, \emph{flow_auto_qc} performs the quality control in three steps.
+For a set of FCS files, \emph{flow_auto_qc} performs the quality control in three steps.
 It automatically detects and removes anomalies in the flow rate, in the
 signal acquisition and in the dynamic range.
 }
@@ -107,7 +107,7 @@ signal acquisition and in the dynamic range.
 data(Bcells)
 
 ## quality control
-flow_auto_qc(Bcells[[1]], html_report = FALSE, fcs_highQ = FALSE, folder_results = FALSE)
+flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_highQ = FALSE, folder_results = FALSE)
 
 }
 \author{

@@ -90,7 +90,7 @@ flow_rate_plot <- function(FlowRateQC) {
               theme_bw() + theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
               text=element_text(size = 14)) + geom_line(colour = "red" )
-    xgraph <- xgraph + labs(x= "Seconds", y= paste0("Number of cells per 1/",
+    xgraph <- xgraph + labs(x= "Seconds", y= paste0("Number of events per 1/",
               1  /second_fraction, " of a second"), title= "Flow Rate")
 
   # Add anoms to the plot as circles.

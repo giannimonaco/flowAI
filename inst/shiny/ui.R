@@ -7,7 +7,7 @@ shinyUI(fluidPage(
         column(3,
 
                h4("Input:"),
-               fileInput('fcsFiles', strong('Choose fcs file:'), multiple = FALSE,
+               fileInput('fcsFiles', strong('Choose FCS file:'), multiple = FALSE,
                          accept = c('text/fcs', '.fcs')),
                actionButton("goButton", "Submit!"),
 

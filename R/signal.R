@@ -198,7 +198,7 @@ flow_signal_plot <- function(FlowSignalQC) {
   longdata <- melt(data, id.vars = "binID", variable.name = "marker",
     value.name = "value")
   FS_graph <- ggplot(longdata, aes(x = binID, y = value, col = marker),
-      environment = environment()) + labs(x = "segment Id",
+      environment = environment()) + labs(x = "Bin ID",
       y = "Median Intensity value") +
       geom_line() + facet_grid(marker ~ ., scales = "free") + theme_bw() +
       theme(strip.text.y = element_text(angle = 0,

@@ -127,26 +127,26 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
         })
         ymax <- max(lowline, upline)
         plot(lowline, type ="l", col = "blue", bty ="n",
-            ylim = c(0, ymax), xlab = "segment ID",
-            ylab = "Number of cells removed", cex.lab=1 )
+            ylim = c(0, ymax), xlab = "Bin ID",
+            ylab = "Number of events removed", cex.lab=1 )
         lines(upline, col = "red")
-        legend("top", c("Negative Outliers", "Upper Margine Events"), lty = 1,bty = "n", cex = 1,
+        legend("top", c("Negative Outliers", "Upper Margin Events"), lty = 1,bty = "n", cex = 1,
             col = c("blue", "red"))
     }else if( length(bad_lowerIDs) != 0 & length(bad_upperIDs) == 0){
         lowline <- sapply(tmpx, function(x){
             length(which(bad_lowerIDs %in% x))
         })
-        plot(lowline, type ="l", col = "blue", bty ="n", xlab = "segment ID",
-            ylab = "Number of cells removed", cex.lab=1 )
+        plot(lowline, type ="l", col = "blue", bty ="n", xlab = "Bin ID",
+            ylab = "Number of events removed", cex.lab=1 )
         legend("top", c("Negative Outliers"), lty = 1,bty = "n", cex = 1,
             col = "blue")
     }else if( length(bad_lowerIDs) == 0 & length(bad_upperIDs) != 0){
         upline <- sapply(tmpx, function(x){
             length(which(bad_upperIDs %in% x))
         })
-        plot(upline, type ="l", col = "red", bty ="n", xlab = "segment ID",
-            ylab = "Number of cells removed", cex.lab=1 )
-        legend("top", c("Upper Margine Events"), lty = 1,bty = "n", cex = 1,
+        plot(upline, type ="l", col = "red", bty ="n", xlab = "Bin ID",
+            ylab = "Number of events removed", cex.lab=1 )
+        legend("top", c("Upper Margin Events"), lty = 1,bty = "n", cex = 1,
             col = "red")
     }
 }

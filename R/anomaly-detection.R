@@ -69,7 +69,7 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
     ############## -- Main analysis: Perform C-H-ESD -- #################
     # -- Step 1: Decompose data. This will return two more components: trend and cycle   
     if(use_decomp){
-        x_cf <- mFilter(x, filter="CF")
+        x_cf <- cffilter(x)
         #med_t <- trunc(median(x_cf$trend))
         med_t <- trunc(median(x))
         sign_n <- sign(x_cf$trend - med_t)

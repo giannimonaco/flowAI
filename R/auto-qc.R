@@ -1,10 +1,10 @@
-#' Automatic quality control on .fcs files.
+#' Automatic quality control on FCS files.
 #'
-#' For a set of .fcs files, \emph{flow_auto_qc} performs the quality control in three steps.
+#' For a set of FCS files, \emph{flow_auto_qc} performs the quality control in three steps.
 #' It automatically detects and removes anomalies in the flow rate, in the
 #' signal acquisition and in the dynamic range.
 #'
-#' @param fcsfiles It can be a character vector with the filenames of the .fcs files,
+#' @param fcsfiles It can be a character vector with the filenames of the FCS files,
 #' a flowSet or a flowFrame.
 #' @param remove_from Decide which steps have to be considered for the removal of
 #' anomalies. The full quality control is performed by default with the option \code{"all"}.
@@ -13,7 +13,7 @@
 #' \emph{FS} commands the QC for signal acquisition, and \emph{FM} commands
 #' the QC for the margins of the dynamic range.
 #' @param timeCh Character string corresponding to the name of the Time Channel
-#' in the set of .fcs files. By default is \code{NULL} and the name is retrieved
+#' in the set of FCS files. By default is \code{NULL} and the name is retrieved
 #' automatically.
 #' @param second_fractionFR The fraction of a second that is used to split
 #' the time channel to recreate the flow rate. The fraction used by default is 1/10 of a second.
@@ -35,7 +35,7 @@
 #' @param pen_valueFS The value of the penalty for the changepoint detection
 #' algorithm. This can be a numeric value or text giving the formula to use,
 #' for instance it is possible to use the character string "1.5*log(n)",
-#' where n indicates the number of cells in the .fcs file. The higher the
+#' where n indicates the number of cells in the FCS file. The higher the
 #' penalty value the less strict is the detection of the anomalies.
 #' The default value is \code{200}.
 #' @param max_cptFS The maximum number of changepoints that can be detected
@@ -50,24 +50,24 @@
 #' fcs analyzed to name a html document reporting the results of the quality control. 
 #' The default is \code{"_QC"}. If you do not want to generate a report 
 #' use \code{FALSE}.
-#' @param mini_report create a .txt file with the percentage of anomalies detected in 
-#' each .fcs file analysed. The default is \code{"_QCmini"}. If you prefer not to generate 
+#' @param mini_report create a text file with the percentage of anomalies detected in 
+#' each FCS file analysed. The default is \code{"_QCmini"}. If you prefer not to generate 
 #' the mini report use \code{FALSE}.
 #' @param fcs_highQ Character string that will be added to the filename of the 
-#' fcs analyzed to name the new .fcs file that will be generated containing only the 
+#' fcs analyzed to name the new FCS file that will be generated containing only the 
 #' cells that passed the quality control. The default is \code{"_HighQ"}. If you do not 
-#' want to generate a new .fcs file use \code{FALSE}.
+#' want to generate a new FCS file use \code{FALSE}.
 #' @param fcs_lowQ Character string that will be added to the filename of the 
-#' fcs analyzed to name the new .fcs file that will be generated containing only the 
-#' cells that do not passed the quality control. By default the .fcs file is not 
+#' fcs analyzed to name the new FCS file that will be generated containing only the 
+#' cells that do not passed the quality control. By default the FCS file is not 
 #' generated and the argument is set as \code{FALSE} 
 #' @param folder_results Character string for the name of the directory that will contain 
 #' the results. The default is \code{"resultsQC"}. If you intend return the results 
 #' in the main directory use \code{FALSE}.
-#' @return It will return the .fcs files containing only the cells that
+#' @return It will return the FCS files containing only the cells that
 #' passed the quality checks. By default it will return a report indicating the cells
 #' that were removed in the flow rate, signal acquisition over time and anomalous marginal
-#' events on the dynamic range. It will also return a new .fcs file containing
+#' events on the dynamic range. It will also return a new FCS file containing
 #' only the cells that did not pass the quality check.
 #' @author Gianni Monaco 
 #' @examples
@@ -81,7 +81,6 @@
 #' @import flowCore
 #' @import ggplot2
 #' @import plyr
-#' @import mFilter
 #' @importFrom changepoint cpt.meanvar
 #' @importFrom scales pretty_breaks
 #' @import knitr
@@ -223,11 +222,12 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
 
       badCellIDs <- setdiff(origin_cellIDs, goodCellIDs)
       totalBadPerc <- round(length(badCellIDs)/length(origin_cellIDs), 2)
+      if (fcs_highQ != FALSE || fcs_lowQ != FALSE) {
+        params <- parameters(ordFCS)
+        keyval <- keyword(ordFCS)
+        sub_exprs <- exprs(ordFCS)
+      }
       if (length(badCellIDs) > 1 & fcs_highQ != FALSE) {
-      params <- parameters(ordFCS)
-      keyval <- keyword(ordFCS)
-      sub_exprs <- exprs(ordFCS)
-
       good_sub_exprs <- sub_exprs[goodCellIDs, ]
       goodfcs <- flowFrame(exprs = good_sub_exprs,
         parameters = params, description = keyval)
