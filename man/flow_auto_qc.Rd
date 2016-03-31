@@ -7,9 +7,9 @@
 flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
   second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
   ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200,
-  max_cptFS = 3, ChFM = NULL, sideFM = "both", html_report = "_QC",
-  mini_report = "QCmini", fcs_highQ = "_HighQ", fcs_lowQ = FALSE,
-  folder_results = "resultsQC")
+  max_cptFS = 3, ChFM = NULL, sideFM = "both", neg_valuesFM = 1,
+  html_report = "_QC", mini_report = "QCmini", fcs_highQ = "_HighQ",
+  fcs_lowQ = FALSE, folder_results = "resultsQC")
 }
 \arguments{
 \item{fcsfiles}{It can be a character vector with the filenames of the FCS files,
@@ -27,7 +27,11 @@ in the set of FCS files. By default is \code{NULL} and the name is retrieved
 automatically.}
 
 \item{second_fractionFR}{The fraction of a second that is used to split
-the time channel to recreate the flow rate. The fraction used by default is 1/10 of a second.}
+the time channel in order to recreate the flow rate. Set it to 
+\code{"timestep"} if you wish to recreate the flow rate at the maximum 
+resolution allowed by the flow cytometry instruments. Usuallythe timestep 
+corresponds to 0.01, however, to shorten the running time of the analysis the 
+fraction used by default is 0.1, corresponding to 1/10 of a second.}
 
 \item{alphaFR}{The level of statistical significance used to
 accept anomalies detected by the ESD method. The default value is \code{0.01}.}
@@ -65,6 +69,11 @@ option is \code{NULL} and with it all the channels are selected for the analysis
 \item{sideFM}{Select if the checking of the dynamic range should be performed in the
 lower side, upper side or both sides of the acquitision range. Choose between:
 \code{'both' | 'upper' | 'lower'}. The default value is \code{both}.}
+
+\item{neg_valuesFM}{Scalar indicating the method to use for the removal of the 
+anomalies from the lower limit of the dynamic range. Use \code{1} to remove 
+negative outliers or use \code{2} to truncate the negative values to the cut-off
+indicated in the FCS file.}
 
 \item{html_report}{Character string that will be added to the filename of the 
 fcs analyzed to name a html document reporting the results of the quality control. 

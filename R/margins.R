@@ -2,7 +2,7 @@
 # range of values are detected and removed.
 #
 flow_margin_check <- function(x,  margin_channels = NULL,
-                      side = "both") {
+                      side = "both", neg_values = 1) {
 
   if (is.null(margin_channels)) {
     teCh <- grep("Time|time|TIME|Event|event|EVENT", colnames(x), value = TRUE)
@@ -20,8 +20,7 @@ flow_margin_check <- function(x,  margin_channels = NULL,
   lenx <- length(xx)
 
   ## lower check
-  if (side == "lower" || side == "both") {
-
+  if ((side == "lower" || side == "both") && neg_values == 1) {
     out_neg_range <- apply(yy, 2, function(x) {
       neg <- which(x < 0)
       # Zscores <- (0.6745*(x[neg] + median(x[neg])))/mad(x[neg]) ## it
@@ -36,27 +35,34 @@ flow_margin_check <- function(x,  margin_channels = NULL,
   }
 
   # n. bad cells for each channel
-  if (side == "lower" || side == "both") {
+  if ((side == "lower" || side == "both") && neg_values == 1) {
     neg_bad_len <- sapply(parms, function(x) length(xx[yy[, x] <= out_neg_range[x]]))
   }
+  if ((side == "lower" || side == "both") && neg_values == 2) {
+    neg_bad_len <- sapply(parms, function(x) length(xx[yy[, x] <= range[1, x]]))
+  }
   if (side == "upper" || side == "both") {
-    pos_bad_len <- sapply(parms, function(x) length(xx[yy[, x] >= range[2,
-      x]]))
+    pos_bad_len <- sapply(parms, function(x) length(xx[yy[, x] >= range[2, x]]))
   }
 
   # badcellIDs
-  if (side == "lower" || side == "both") {
-    lowID <- do.call(c, lapply(parms, function(ch) {
+  if ((side == "lower" || side == "both") && neg_values == 1) {
+      lowID <- do.call(c, lapply(parms, function(ch) {
       xx[yy[, ch] <= out_neg_range[ch]]
-    }))
+      }))
     if(length(scatter_parms) != 0){   ### check for values less than 0 in scatter parameters
       minSc <- apply(yy[,scatter_parms], 1, function(x){
         min(x)
       })
       low_scatter_ID <- which(minSc < 0)
-      lowID <- unique(c(lowID, low_scatter_ID))
+      lowID <- c(lowID, low_scatter_ID)
     }
   }
+  if ((side == "lower" || side == "both") && neg_values == 2) {
+      lowID <- do.call(c, lapply(parms, function(ch) {
+          xx[yy[, ch] <= range[1, ch]]
+      }))
+  } 
   if (side == "upper" || side == "both") {
     upID <- do.call(c, lapply(parms, function(ch) {
       xx[yy[, ch] >= range[2, ch]]
