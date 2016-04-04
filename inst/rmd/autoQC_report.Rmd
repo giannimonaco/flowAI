@@ -38,7 +38,7 @@ if(length(set) >= 3 ){
 > **`r FlowRateQC$res_fr_QC$badPerc * 100`** % anomalies detected in the flow rate check.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = 4, fig.width= 10}
-  if (length(nchar(timeCh)) != 0 && !is.null(timeCh)) {   
+  if (length(nchar(timeCh)) != 0 && !is.null(timeCh) && is.null(temptime)) {   
         flow_rate_plot(FlowRateQC) 
 } 
 ```
@@ -46,10 +46,16 @@ if(length(set) >= 3 ){
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
   if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {   
         cat("It was not possible to analyse the flow rate since the \"Time\" channel was missing. \n")
+  }else if( !is.null(temptime) && temptime == "single_value"){
+cat("It was not possible to analyse the flow rate since the \"Time\" channel contains a single value. \n")
    }
 ```
 
-The plot reconstructs the flow rate with a resolution of 1/`r 1/second_fractionFR` of a second. Anomalies in the flow rate are identified with an algorithm based on the generalied ESD outlier detection method. The anomalies are circled in green.
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+  if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {   
+    cat(paste0("The plot reconstructs the flow rate with a resolution of 1/", 1/second_fractionFR, " of a second. Anomalies in the flow rate are identified with an algorithm based on the generalied ESD outlier detection method. The anomalies are circled in green. \n"))
+   }
+```
 
 ### Signals acquisition check
 
@@ -106,7 +112,14 @@ if(!is.null(FlowSignalQC$ch_no_cpt) && length(FlowSignalQC$ch_no_cpt) != 0 ){
 flow_margin_plot(FlowMarginQC, FSbinSize)
 ```
 
-The plot shows where the anomalies occured the most. The x-axis scale is complementary to the one of the signal acquisition plot.
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+  if(length(FlowMarginQC$bad_lowerIDs) == 0 && length(FlowMarginQC$bad_upperIDs) == 0){
+      cat("")
+  }else{
+    cat("The plot shows where the anomalies occured the most. The x-axis scale is complementary to the one of the signal acquisition plot. \n")
+  }
+```
+
 
 ##### More info on the margin events detected:
 

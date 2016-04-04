@@ -87,7 +87,7 @@ shinyServer(function(input, output, session) {
             optSize <- min(max(1, floor(maxSize/100)), 500)
 
         }
-        numericInput("signalBinSize", label = h5("Signal bin size (cell number)"),
+        numericInput("signalBinSize", label = h5("Signal bin size (event number)"),
                      value = optSize, min = 1, max = maxSize)
     })
 
@@ -183,31 +183,31 @@ shinyServer(function(input, output, session) {
     output$summaryText1 <- renderText({
         if(is.null(checkRes()))
             return(NULL)
-        paste0("Total number of cells: ", checkRes()[[1]])
+        paste0("Total number of events: ", checkRes()[[1]])
     })
 
     output$summaryText2 <- renderText({
         if(is.null(checkRes()))
             return(NULL)
-        paste0("Percentage of low-Q cells: ", round(checkRes()[[2]]*100,2), "%")
+        paste0("Percentage of low-Q events: ", round(checkRes()[[2]]*100,2), "%")
     })
 
     output$flowRateSummary <- renderText({
         if(is.null(checkRes()))
             return(NULL)
-        paste0("Percentage of low-Q cells in flow rate check: ", round(checkRes()[[5]]*100,2), "%")
+        paste0("Percentage of low-Q events in flow rate check: ", round(checkRes()[[5]]*100,2), "%")
     })
 
     output$flowSignalSummary <- renderText({
         if(is.null(checkRes()))
             return(NULL)
-        paste0("Percentage of low-Q cells in flow signal check: ", round(checkRes()[[6]]*100,2), "%")
+        paste0("Percentage of low-Q events in signal acquisition check: ", round(checkRes()[[6]]*100,2), "%")
     })
 
     output$flowMarginSummary <- renderText({
         if(is.null(checkRes()))
             return(NULL)
-        paste0("Percentage of low-Q cells in flow margin check: ", round(checkRes()[[7]]*100,2), "%")
+        paste0("Percentage of low-Q events in dynamic range check: ", round(checkRes()[[7]]*100,2), "%")
     })
 
     file_base <- reactive({

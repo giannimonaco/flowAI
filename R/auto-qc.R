@@ -119,7 +119,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
     timeCh <- findTimeChannel(set[[1]])
   }
   if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {
-    warning("Impossible to retreive it automatically. The quality control can be performed only on signal and dynamic range.")
+    warning("Impossible to retrieve it automatically. The quality control can be performed only on signal and dynamic range.")
   }
 
   # in some cases, especially if the FCS file has been modified, there
@@ -177,9 +177,15 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
     area <- area.color
     area[i] <- "blue"
 
-    # check if the FCS file is ordered by time
+    # check the time channel of the file
+    temptime <- NULL
     if (length(nchar(timeCh)) != 0 && !is.null(timeCh)) {
-        ordFCS <- ord_fcs_time(set[[i]], timeCh)
+        if (length(unique(exprs(set[[i]])[, timeCh])) == 1){
+            cat("The time channel contain a single value. It cannot be used to recreate the flow rate. \n")
+            ordFCS <- set[[i]]
+            temptime <- "single_value"
+        }else{ordFCS <- ord_fcs_time(set[[i]], timeCh)
+        }
     }else{ ordFCS <- set[[i]] }
    # ordFCS <- set[[i]]   ## TEMPORARY
     origin_cellIDs <- 1:nrow(ordFCS)
@@ -188,12 +194,12 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
     FR_bin_arg <- list( second_fraction = second_fractionFR, timeCh = timeCh, 
                   timestep = timestep)
     FR_QC_arg <- list( alpha = alphaFR, use_decomp = decompFR)
-    FS_bin_arg <- list( binSize = FSbinSize, timeCh = timeCh, timestep = timestep )
+    FS_bin_arg <- list( binSize = FSbinSize, timeCh = timeCh, timestep = timestep, temptime = temptime)
     FS_QC_arg <- list( ChannelRemove = ChRemoveFS, pen_valueFS, max_cptFS, outlierFS )
     FM_QC_arg <- list( margin_channels = ChFM , side= sideFM, neg_values = neg_valuesFM)
 
     #### The actual analysis is performed here
-    if (length(nchar(timeCh)) != 0 && !is.null(timeCh)) {
+    if (length(nchar(timeCh)) != 0 && !is.null(timeCh) && is.null(temptime)) {
       FlowRateData <- do.call(flow_rate_bin, c(ordFCS, FR_bin_arg ))
       FlowRateQC <- do.call(flow_rate_check, c(ordFCS, list(FlowRateData), FR_QC_arg ))
       } else if(remove_from == "all"){
@@ -241,20 +247,20 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
         keyval <- keyword(ordFCS)
         sub_exprs <- exprs(ordFCS)
       }
-      if (length(badCellIDs) > 1 & fcs_highQ != FALSE) {
+      if (length(badCellIDs) > 0 & fcs_highQ != FALSE) {
       good_sub_exprs <- sub_exprs[goodCellIDs, ]
       goodfcs <- flowFrame(exprs = good_sub_exprs,
         parameters = params, description = keyval)
     suppressWarnings(write.FCS(goodfcs, good.fcs.file))
     }
-    if (length(badCellIDs) > 1 & fcs_lowQ != FALSE) {
+    if (length(badCellIDs) > 0 & fcs_lowQ != FALSE) {
       bad_sub_exprs <- sub_exprs[badCellIDs, ]
       badfcs <- flowFrame(exprs = bad_sub_exprs,
         parameters = params,description = keyval)
       suppressWarnings(write.FCS(badfcs, bad.fcs.file))
     }
      # write.table(as.vector(badCellIDs), file= paste0("resultsQC/", filename, "_bad.txt"), sep = "\t", row.names = FALSE, col.names = FALSE)  # TEMPORARY
-    if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {
+    if (length(nchar(timeCh)) == 0 || is.null(timeCh) || !is.null(temptime)) {
         FlowRateQC<-list()
         FlowRateQC$res_fr_QC$badPerc <- 0
     }

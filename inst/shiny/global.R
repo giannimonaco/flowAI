@@ -44,7 +44,7 @@ ord_fcs_time <- function(x, timeCh= "Time"){
 
 
 
-flow_rate_bin <- function(x, second_fraction = 0.1, timeCh = "Time", timestep = 0.34){
+flow_rate_bin <- function(x, second_fraction = 0.1, timeCh = "Time", timestep = 0.1){
 
     xx <- exprs(x)[, timeCh]
     idx <- c(1:nrow(x))
@@ -109,7 +109,7 @@ flow_rate_check <- function(flowRateData, lowerRateThres, upperRateThres,
     goodcell_y <- which(frequencies$tbCounts < upperRateThres & frequencies$tbCounts > lowerRateThres)
 
     flowRateQC <- cellBinID$cellID[ cellBinID$binID %in% intersect(goodcell_x, goodcell_y) ]
-    cat("flow rate high Q cells: ", length(flowRateQC), "\n")
+    cat("flow rate high Q events: ", length(flowRateQC), "\n")
     return(flowRateQC)
 }
 
@@ -166,7 +166,7 @@ flow_signal_plot <- function(flowSignalData, lowerBinThres, upperBinThres) {
     longdata <- melt(data, id.vars = "binID", variable.name = "marker", value.name = "value")
     FS_graph <- ggplot(longdata, aes(x = binID, y = value, col = marker), environment = environment()) +
         geom_line() + facet_grid(marker ~ ., scales = "free") +
-        labs(x = "segment Id", y = "Median Intensity value") + theme_bw() +
+        labs(x = "Bin ID", y = "Median Intensity value") + theme_bw() +
         theme(strip.text.y = element_text(angle = 0, hjust = 1), axis.text = element_text(size = 10),
               axis.title = element_text(size = 15), legend.position = "none") +
         scale_x_continuous(breaks= pretty_breaks(n = 10)) +
@@ -296,7 +296,7 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
     cf <- c(rep(1:nrBins, each = binSize), rep(nrBins + 1, tot_events - nrBins * binSize))
     tmpx <- split(1:tot_events, cf)
 
-    if(length(bad_lowerIDs) != 0 & length(bad_upperIDs) != 0){
+    if(length(bad_lowerIDs) != 0 && length(bad_upperIDs) != 0){
         lowline <- sapply(tmpx, function(x){
             length(which(bad_lowerIDs %in% x))
         })
@@ -310,7 +310,7 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
         lines(upline, col = "red")
         legend("top", c("Negative Outliers", "Upper Margine Events"), lty = 1,bty = "n", cex = 0.7,
             col = c("blue", "red"))
-    }else if( length(bad_lowerIDs) != 0 & length(bad_upperIDs) == 0){
+    }else if( length(bad_lowerIDs) != 0 && length(bad_upperIDs) == 0){
         lowline <- sapply(tmpx, function(x){
             length(which(bad_lowerIDs %in% x))
         })
@@ -318,7 +318,7 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
             ylab = "Number of cells removed" )
         legend("top", c("Negative Outliers"), lty = 1,bty = "n", cex = 0.7,
             col = "blue")
-    }else if( length(bad_lowerIDs) == 0 & length(bad_upperIDs) != 0){
+    }else if( length(bad_lowerIDs) == 0 && length(bad_upperIDs) != 0){
         upline <- sapply(tmpx, function(x){
             length(which(bad_upperIDs %in% x))
         })

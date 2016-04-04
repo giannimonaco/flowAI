@@ -5,7 +5,7 @@
 # @param channels: channel names for the selected markers
 # @param binSize: the size of bin
 flow_signal_bin <- function(x, channels = NULL, binSize = 500,
-  timeCh = timeCh, timestep = timestep) {
+  timeCh = timeCh, timestep = timestep, temptime = temptime) {
 
   ## some sanity checking
   if (!is(x, "flowFrame"))
@@ -21,7 +21,7 @@ flow_signal_bin <- function(x, channels = NULL, binSize = 500,
 
   ### Retriving time and expression info
   exp <- exprs(x)
-  if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {
+  if (length(nchar(timeCh)) == 0 || is.null(timeCh) || !is.null(temptime)) {
       timex <- seq(from = 0, length.out = nrow(x), by = 0.1)
   }else{
     timex <- exp[, timeCh]

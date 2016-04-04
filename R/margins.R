@@ -124,7 +124,7 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
     cf <- c(rep(1:nrBins, each = binSize), rep(nrBins + 1, tot_events - nrBins * binSize))
     tmpx <- split(1:tot_events, cf)
 
-    if(length(bad_lowerIDs) != 0 & length(bad_upperIDs) != 0){
+    if(length(bad_lowerIDs) != 0 && length(bad_upperIDs) != 0){
         lowline <- sapply(tmpx, function(x){
             length(which(bad_lowerIDs %in% x))
         })
@@ -138,7 +138,7 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
         lines(upline, col = "red")
         legend("top", c("Negative Outliers", "Upper Margin Events"), lty = 1,bty = "n", cex = 1,
             col = c("blue", "red"))
-    }else if( length(bad_lowerIDs) != 0 & length(bad_upperIDs) == 0){
+    }else if( length(bad_lowerIDs) != 0 && length(bad_upperIDs) == 0){
         lowline <- sapply(tmpx, function(x){
             length(which(bad_lowerIDs %in% x))
         })
@@ -146,7 +146,7 @@ flow_margin_plot <- function(FlowMarginData, binSize = 500) {
             ylab = "Number of events removed", cex.lab=1 )
         legend("top", c("Negative Outliers"), lty = 1,bty = "n", cex = 1,
             col = "blue")
-    }else if( length(bad_lowerIDs) == 0 & length(bad_upperIDs) != 0){
+    }else if( length(bad_lowerIDs) == 0 && length(bad_upperIDs) != 0){
         upline <- sapply(tmpx, function(x){
             length(which(bad_upperIDs %in% x))
         })

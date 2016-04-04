@@ -18,14 +18,14 @@ shinyUI(fluidPage(
 
                hr(),
                h4("Parameters:"),
-               numericInput("timeLenth", label = h5("Time bin length (s)"), value = 0.1, step = 0.1),
+               numericInput("timeLenth", label = h5("Time step (sec)"), value = 0.1, step = 0.1),
                uiOutput("signalBinSize"),
 
                hr(),
                h4("Output:"),
-               downloadButton('downloadGoodFCS', 'Download High Q cells (FCS)'),
+               downloadButton('downloadGoodFCS', 'Download High Q file (FCS)'),
                br(),
-               downloadButton('downloadBadFCS', 'Download Low Q cells (FCS)'),
+               downloadButton('downloadBadFCS', 'Download Low Q file (FCS)'),
 
                hr(),
                div(style = "margin-top: 30px; width: 200px; ", HTML("Developed by")),
@@ -67,7 +67,7 @@ shinyUI(fluidPage(
                                           textOutput("flowMarginSummary")
                                    ),
                                    column(3, offset = 2,
-                                          checkboxInput("checkbox", label = "Apply Margin Check", value = TRUE)
+                                          checkboxInput("checkbox", label = "Apply Margins Check", value = TRUE)
                                    )
                                ),
                                hr(),
