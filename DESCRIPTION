@@ -1,7 +1,6 @@
 Package: flowAI
 Type: Package
-Title: Automatic and interactive quality control for flow cytometry
-        data
+Title: Automatic and interactive quality control for flow cytometry data
 Version: 0.99.5
 Date: 2016-04-04
 Author: Gianni Monaco, Chen Hao
@@ -20,4 +19,3 @@ Maintainer: Gianni Monaco <gianni@liverpool.ac.uk>
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
 NeedsCompilation: no
-Packaged: 2016-01-07 06:49:44 UTC; GianniMonaco
