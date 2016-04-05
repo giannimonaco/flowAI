@@ -1,19 +1,16 @@
 # Guess which channel captures time in a exprs, flowFrame or flowset
-findTimeChannel <- function(xx, strict = FALSE) {
-  time <- grep("^Time$|^TIME$|^time$", colnames(xx), value = TRUE, ignore.case = TRUE)[1]
-  if (is.na(time)) {
-    if (is(xx, "flowSet") || is(xx, "ncdfFlowList"))
-      xx <- exprs(xx[[1]]) else if (is(xx, "flowFrame"))
-        xx <- exprs(xx)
-      cont <- apply(xx, 2, function(y) all(sign(diff(y)) >= 0))
-      time <- names(which(cont))
-  }
-  if (!length(time) && strict)
-    stop("Unable to identify time domain recording for this data.\n", "Please define manually.",
-      call. = FALSE)
-  if (length(time) > 1)
-    time <- character(0)
-  return(time)
+findTimeChannel <- function(xx) {
+    time <- grep("^Time$", colnames(xx), value = TRUE, ignore.case = TRUE)[1]
+    if (is.na(time)) {
+        if (is(xx, "flowSet") || is(xx, "ncdfFlowList"))
+            xx <- exprs(xx[[1]]) else if (is(xx, "flowFrame"))
+                xx <- exprs(xx)
+            cont <- apply(xx, 2, function(y) all(sign(diff(y)) >= 0))
+            time <- names(which(cont))
+    }
+    if (!length(time) || length(time) > 1)
+        time <- NULL
+    return(time)
 }
 
 # Check if the Fcs file is ordered according to time otherwise it order it.

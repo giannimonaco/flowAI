@@ -11,20 +11,10 @@ opts_chunk$set(fig.align='center', out.width='750px', dpi=200)  #out.width='750p
 #opts_chunk$set(dev = 'pdf')
 ```
 
-## Quality control report 
+## FCS file information
 
 > Input file name: `r filename`    
-> Number of events: `r as.integer(dim(set[[i]])[1])`  
-> The anomalies were removed from:  `r analysis`   
-> Anomalies detected in total: **`r totalBadPerc * 100`** %  
-
-
-### Number of events in each FCS file:
-
-If the number of FCS files is higher than 3, a histogram reports the number of
-events for each FCS file of the dataset. In blue is highlighted the FCS file 
-whose quality control analysis is described in this report.
-
+> Number of events: `r as.integer(dim(set[[i]])[1])`
 
 ```{r, echo=FALSE, fig.height = 3}
 if(length(set) >= 3 ){
@@ -32,27 +22,41 @@ if(length(set) >= 3 ){
 }
 ```
 
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+  if ( length(set) >= 3 ){   
+        cat("Comparison of the number of events stored in the FCS files of the entire dataset. In blue is highlighted the FCS file whose quality control analysis is described in this report. \n")
+  }
+```
+
+## Quality control analysis 
+
+### Summary
+
+> The anomalies were removed from:  `r analysis`  
+> Anomalies detected in total: **`r totalBadPerc * 100`** %  
+> Number of high quality events: `r length(goodCellIDs)`  
+
 
 ### Flow rate check
 
 > **`r FlowRateQC$res_fr_QC$badPerc * 100`** % anomalies detected in the flow rate check.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = 4, fig.width= 10}
-  if (length(nchar(timeCh)) != 0 && !is.null(timeCh) && is.null(temptime)) {   
+  if ( is.null(TimeChCheck) ) {   
         flow_rate_plot(FlowRateQC) 
 } 
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
-  if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {   
-        cat("It was not possible to analyse the flow rate since the \"Time\" channel was missing. \n")
-  }else if( !is.null(temptime) && temptime == "single_value"){
-cat("It was not possible to analyse the flow rate since the \"Time\" channel contains a single value. \n")
+  if ( !is.null(TimeChCheck) && TimeChCheck == "NoTime" ) {   
+        cat("It was not possible to analyze the flow rate since the time channel is missing. \n")
+  }else if( !is.null(TimeChCheck) && TimeChCheck == "single_value"){
+cat("It was not possible to analyze the flow rate since the time channel contains a single value. \n")
    }
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
-  if (length(nchar(timeCh)) == 0 || is.null(timeCh)) {   
+  if ( is.null(TimeChCheck) ) {   
     cat(paste0("The plot reconstructs the flow rate with a resolution of 1/", 1/second_fractionFR, " of a second. Anomalies in the flow rate are identified with an algorithm based on the generalied ESD outlier detection method. The anomalies are circled in green. \n"))
    }
 ```
@@ -72,7 +76,7 @@ cat("It was not possible to analyse the flow rate since the \"Time\" channel con
 flow_signal_plot(FlowSignalQC)
 ```
 
-The more stable region selected consistent for all channels is highlighted in yellow. If the removal of outliers has been required before the execution of the changepoint analysis, then the detected outliers are cicled in green.
+The more stable region selected consistent for all channels is highlighted in yellow. If the removal of outliers has been required before the execution of the changepoint analysis, the detected outliers are cicled in green.
 
 The FCS file was divided in `r FlowSignalData$bins` bins. The stable region is located between the bins `r FlowSignalQC$segm[1]` and `r FlowSignalQC$segm[2]`.
 
@@ -86,7 +90,7 @@ if(!is.null(FlowSignalQC$tab_cpt)){
 }
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 if(!is.null(FlowSignalQC$tab_cpt)){
    as.data.frame(FlowSignalQC$tab_cpt )
 }
@@ -94,15 +98,14 @@ if(!is.null(FlowSignalQC$tab_cpt)){
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
 if(!is.null(ChRemoveFS)){
-     cat(paste0("Channels excluded from the analysis: ", paste(ChannelRemovedFS, collapse = ", "), ". \n"))
+     cat(paste0("Channels excluded from the analysis: ", paste(ChannelRemovedFS, collapse = ", "), ". \n \n"))
 }
-```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height = 4, results = 'asis'}
 if(!is.null(FlowSignalQC$ch_no_cpt) && length(FlowSignalQC$ch_no_cpt) != 0 ){
   cat(paste0("No changepoints were detected in the channels: ", paste(FlowSignalQC$ch_no_cpt, collapse = ", "), ". \n"))
 }
 ```
+
 
 ### Dynamic range check
 
@@ -121,9 +124,9 @@ flow_margin_plot(FlowMarginQC, FSbinSize)
 ```
 
 
-##### More info on the margin events detected:
+##### More info on the anomalies detected in the dynamic range check:
 
-The table shows the number of events that did not pass the check for each channel:
+for each channel, The table shows the number of events that did not pass the dynamic range check:
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 FlowMarginQC$margin_events

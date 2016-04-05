@@ -59,7 +59,7 @@ flow_rate_check <- function(x, FlowRateData, alpha = alpha, use_decomp = use_dec
   } else {
     goodCellIDs <- fr_cellBinID$cellID[!(fr_cellBinID$binID %in% fr_autoqc$anoms$index)]
     badCellIDs <- setdiff(fr_cellBinID$cellID, goodCellIDs)
-    badPerc <- round(1 - (length(goodCellIDs)/nrow(fr_cellBinID)), 2)
+    badPerc <- round(1 - (length(goodCellIDs)/nrow(fr_cellBinID)), 4)
     params <- parameters(x)
     keyval <- keyword(x)
     sub_exprs <- exprs(x)

@@ -2,20 +2,22 @@
 % Please edit documentation in R/shiny.R
 \name{flow_iQC}
 \alias{flow_iQC}
-\title{A Shiny app to perform interactive quality control on Flow Cytometry Data}
+\title{Interactive quality control of Flow Cytometry Data}
 \usage{
 flow_iQC()
 }
 \description{
-This function allows to interactively perform the quality control of FCS files in a Shiny
-app. The quality control framework of the Shiny app is equivalent to the
-one of the \code{flow_auto_qc} function. It is composed of three main steps that allow
-to check anomalies in the 1) flow rate, 2) signal acquisition, 3) dynamic range.
+The call of the \code{flow_iQC} function opens a Shiny application that allows 
+to perfom a complete and interactive quality control of an FCS file. The 
+framework of the interactive quality control is complementary to the 
+automatic one of the \code{flow_auto_qc} function. Hence, the anomalies 
+are manually selected from the evaluation of three main properties of 
+flow cytometry: 1) flow rate, 2) signal acquisition, 3) dynamic range.
 }
 \examples{
 if (interactive()) flowAI::flow_iQC()
 }
 \author{
-Chen Hao
+Chen Hao, Gianni Monaco
 }
 

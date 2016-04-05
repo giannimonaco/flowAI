@@ -5,7 +5,7 @@
 # @param channels: channel names for the selected markers
 # @param binSize: the size of bin
 flow_signal_bin <- function(x, channels = NULL, binSize = 500,
-  timeCh = timeCh, timestep = timestep, temptime = temptime) {
+  timeCh = timeCh, timestep = timestep, TimeChCheck = TimeChCheck) {
 
   ## some sanity checking
   if (!is(x, "flowFrame"))
@@ -21,7 +21,7 @@ flow_signal_bin <- function(x, channels = NULL, binSize = 500,
 
   ### Retriving time and expression info
   exp <- exprs(x)
-  if (length(nchar(timeCh)) == 0 || is.null(timeCh) || !is.null(temptime)) {
+  if (!is.null(TimeChCheck)) {
       timex <- seq(from = 0, length.out = nrow(x), by = 0.1)
   }else{
     timex <- exp[, timeCh]
@@ -80,7 +80,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
         x[FS_out] <- med
         return(x)
       })
-      badPerc_out <- round((length(FS_out)/nrow(fs_res)),2)
+      badPerc_out <- round((length(FS_out)/nrow(fs_res)),4)
       cat(paste0(badPerc_out * 100, "% of outliers found in channels' signal. \n"))
     }else{
       fs_res_adj <- fs_res[,parms]
@@ -139,7 +139,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
     colnames(tab_cpt) <- 1:length(tab_cpt[1, ])
   }
   # percentage bad cell detected with the changepoint method
-  badPerc_cp <- round(1 - ((max_seg[2] - max_seg[1])/(length(fs_res[, 1]) - 1)),2)
+  badPerc_cp <- round(1 - ((max_seg[2] - max_seg[1])/(length(fs_res[, 1]) - 1)),4)
 
   cat(paste0(100 * badPerc_cp, "% of anomalous cells detected in signal check. \n"))
  
@@ -150,7 +150,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   goodCellIDs <- fs_cellBinID[which(fs_cellBinID[, 2] >= max_seg[1] &
       fs_cellBinID[, 2] <= max_seg[2]), 1]
 
-  badPerc_tot <- round(1 - length(goodCellIDs)/nrow(fs_cellBinID),2)
+  badPerc_tot <- round(1 - length(goodCellIDs)/nrow(fs_cellBinID),4)
 
   params <- parameters(x)
   keyval <- keyword(x)

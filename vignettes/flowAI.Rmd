@@ -107,18 +107,19 @@ We suggest to run the automatic method first with default settings. If the resul
 
 Here, we give an example of the results obtained after performing the quality control on the first FCS file of the Bcells dataset.
 
-#### File Description
-The summary information of the FCS file analyzed is reported in the first section of the automatically generated report or on the left hand side panel of the `flow_iQC` Shiny app. The summary information contains the name of the file, the number of events and the total percentage of anomalies detected.
+#### File description and quality control summary
+The summary information of the FCS file analyzed is reported in the first section of the automatically generated report or on the left hand side panel of the `flow_iQC` Shiny app. It contains the name of the file, the number of events and the total percentage of anomalies detected and removed.
 
 The following information were obtained from the automatically generated report:
 
 > Input File Name: Bcells1    
 > Number of Events: 64562  
 > The anomalies were removed from: Flow Rate, Flow Signal and Flow Margin
-> Anomalies Detected in total: 40%
+> Anomalies Detected in total: 23%
+> Number of high quality events: 49535
 
-#### Comparison of the number of events among the FCS files of the dataset
-If the dataset has more than three FCS files, the automatic method will report a histogram containing the number of events for each file. In blue is highlighted the FCS file whose quality control analysis is described in the remaining part of the report.
+##### Comparison of the number of events among the FCS files of the dataset
+If the dataset has more than three FCS files, the automatic method will produce a histogram containing the number of events for each file. The bar in blue correspond to the FCS file whose quality control analysis is described in the remaining part of the report.
 
 ![hist_set](hist_set.png)
 

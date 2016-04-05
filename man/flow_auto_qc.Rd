@@ -2,7 +2,7 @@
 % Please edit documentation in R/auto-qc.R
 \name{flow_auto_qc}
 \alias{flow_auto_qc}
-\title{Automatic quality control on FCS files.}
+\title{Automatic quality control of flow cytometry data.}
 \usage{
 flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
   second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
@@ -15,12 +15,12 @@ flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
 \item{fcsfiles}{It can be a character vector with the filenames of the FCS files,
 a flowSet or a flowFrame.}
 
-\item{remove_from}{Decide which steps have to be considered for the removal of
-anomalies. The full quality control is performed by default with the option \code{"all"}.
-Other options are: \code{'FR_FS' | 'FR_FM' | 'FS_FM' | 'FR' | 'FS' | 'FM'}.
-The abbreviation \emph{FR} commands the QC for flow rate,
-\emph{FS} commands the QC for signal acquisition, and \emph{FM} commands
-the QC for the margins of the dynamic range.}
+\item{remove_from}{Select from which of the three steps the anomalies have to be 
+excluded in the high quality FCS file. The default option \code{"all"} removes the 
+anomalies from all the three steps. Alternatively, you can use: 
+\code{"FR_FS", "FR_FM", "FS_FM", "FR", "FS", "FM"}, to remove the anomalies only 
+on a subset of the steps where \emph{FR} stands for the flow rate, \emph{FS} stands
+for signal acquisition and \emph{FM} stands for dynamic range.}
 
 \item{timeCh}{Character string corresponding to the name of the Time Channel
 in the set of FCS files. By default is \code{NULL} and the name is retrieved
@@ -29,7 +29,7 @@ automatically.}
 \item{second_fractionFR}{The fraction of a second that is used to split
 the time channel in order to recreate the flow rate. Set it to 
 \code{"timestep"} if you wish to recreate the flow rate at the maximum 
-resolution allowed by the flow cytometry instruments. Usuallythe timestep 
+resolution allowed by the flow cytometry instrument. Usually, the timestep 
 corresponds to 0.01, however, to shorten the running time of the analysis the 
 fraction used by default is 0.1, corresponding to 1/10 of a second.}
 
@@ -37,89 +37,91 @@ fraction used by default is 0.1, corresponding to 1/10 of a second.}
 accept anomalies detected by the ESD method. The default value is \code{0.01}.}
 
 \item{decompFR}{Logical indicating whether the flow rate should be decomposed 
-in the trend and cyclic components. Default is \code{TRUE} and the ESD 
-outlier detection will be done on the trend component penalized with the 
-magnitude of the cyclic component. If it is \code{FALSE} the ESD outlier 
-detection will be done on the original flow rate.}
+in the trend and cyclical components. Default is \code{TRUE} and the ESD 
+outlier detection will be executed on the trend component penalized by the 
+magnitude of the cyclical component. If it is \code{FALSE} the ESD outlier 
+detection will be executed on the original flow rate.}
 
-\item{ChRemoveFS}{Add a character vector with the names or
-the pattern of the names of the channels that you do not want to include
-in the signal quality control. The default option excludes the 
-scatter parameters using \code{c("FSC", "SSC")}. If you want
-to include all the  parameters in the analysis use \code{NULL}.}
+\item{ChRemoveFS}{Add a character vector with the names or name portions 
+of the channels that you want to exclude from the signal acquisition check. 
+The default option, \code{c("FSC", "SSC")}, excludes the scatter parameters. 
+If you want to include all the parameters in the analysis use \code{NULL}.}
 
-\item{outlierFS}{logical indicating whether to remove outliers from 
-the intensity values
-before performing the changepoint analysis. The default is \code{FALSE}.}
+\item{outlierFS}{logical indicating whether outliers have to be removed
+before the changepoint detection of the signal acquisition check. 
+The default is \code{FALSE}.}
 
 \item{pen_valueFS}{The value of the penalty for the changepoint detection
-algorithm. This can be a numeric value or text giving the formula to use,
-for instance it is possible to use the character string "1.5*log(n)",
+algorithm. This can be a numeric value or text giving the formula to use;
+for instance, you can use the character string \code{"1.5*log(n)"},
 where n indicates the number of cells in the FCS file. The higher the
 penalty value the less strict is the detection of the anomalies.
-The default value is \code{200}.}
+The default is \code{200}.}
 
 \item{max_cptFS}{The maximum number of changepoints that can be detected
-for each channel. The default value is \code{3}.}
+for each channel. The default is \code{3}.}
 
-\item{ChFM}{A character vector that indicates which channels
-need to undergo quality control of the dynamic range. The default
-option is \code{NULL} and with it all the channels are selected for the analysis.}
+\item{ChFM}{A character vector that indicates which channels need to include
+for the dynamic range check. The default option is \code{NULL} and 
+with it all the channels are selected for the analysis.}
 
-\item{sideFM}{Select if the checking of the dynamic range should be performed in the
-lower side, upper side or both sides of the acquitision range. Choose between:
-\code{'both' | 'upper' | 'lower'}. The default value is \code{both}.}
+\item{sideFM}{Select whether the dynamic range check has to be executed on
+both limits, the upper limit or the lower limit. Use one of the options:
+\code{"both", "upper", "lower"}. The default is \code{"both"}.}
 
 \item{neg_valuesFM}{Scalar indicating the method to use for the removal of the 
 anomalies from the lower limit of the dynamic range. Use \code{1} to remove 
 negative outliers or use \code{2} to truncate the negative values to the cut-off
 indicated in the FCS file.}
 
-\item{html_report}{Character string that will be added to the filename of the 
-fcs analyzed to name a html document reporting the results of the quality control. 
-The default is \code{"_QC"}. If you do not want to generate a report 
-use \code{FALSE}.}
+\item{html_report}{Suffix to be added to the FCS filename to name the HTML 
+report of the quality control. The default is \code{"_QC"}. If you do not 
+want to generate a report use \code{FALSE}.}
 
-\item{mini_report}{create a text file with the percentage of anomalies detected in 
-each FCS file analysed. The default is \code{"_QCmini"}. If you prefer not to generate 
+\item{mini_report}{Suffix to be added to the FCS filename to name the TXT 
+file containing the percentage of anomalies detected in each FCS file 
+analyzed. The default is \code{"_QCmini"}. If you do not want to generate 
 the mini report use \code{FALSE}.}
 
-\item{fcs_highQ}{Character string that will be added to the filename of the 
-fcs analyzed to name the new FCS file that will be generated containing only the 
-cells that passed the quality control. The default is \code{"_HighQ"}. If you do not 
-want to generate a new FCS file use \code{FALSE}.}
+\item{fcs_highQ}{Suffix to be added to the FCS filename to name the new FCS 
+containing only the events that passed the quality control. The default is 
+\code{"_HighQ"}. If you do not want to generate the high quality FCS file 
+use \code{FALSE}.}
 
-\item{fcs_lowQ}{Character string that will be added to the filename of the 
-fcs analyzed to name the new FCS file that will be generated containing only the 
-cells that do not passed the quality control. By default the FCS file is not 
-generated and the argument is set as \code{FALSE}}
+\item{fcs_lowQ}{Suffix to be added to the FCS filename to name the new FCS 
+containing only the events that did not pass the quality control. The default 
+is \code{FALSE} and hence the low quality FCS file is not generated.}
 
-\item{folder_results}{Character string for the name of the directory that will contain 
-the results. The default is \code{"resultsQC"}. If you intend return the results 
-in the main directory use \code{FALSE}.}
+\item{folder_results}{Character string used to name of the directory that 
+contains the results. The default is \code{"resultsQC"}. If you intend 
+to return the results in the main directory use \code{FALSE}.}
 }
 \value{
-It will return the FCS files containing only the cells that
-passed the quality checks. By default it will return a report indicating the cells
-that were removed in the flow rate, signal acquisition over time and anomalous marginal
-events on the dynamic range. It will also return a new FCS file containing
-only the cells that did not pass the quality check.
+A complete quality control is performed on flow cytometry data in FCS
+format. By default the analysis returns a directory named \code{resultsQC}
+containing:
+1. a set of new FCS files including only the events that passed the 
+quality control, 
+2. a set of HTML reports, one for each FCS file, that include graphs and table 
+indicating where the anomalies were detected,
+3. a single TXT file reporting the percentage of events removed in each FCS file.
 }
 \description{
-For a set of FCS files, \emph{flow_auto_qc} performs the quality control in three steps.
-It automatically detects and removes anomalies in the flow rate, in the
-signal acquisition and in the dynamic range.
+For a set of FCS files, \emph{flow_auto_qc} performs a complete and automatic 
+quality control. It consists in the detection and removal of
+anomalies by checking three properties of flow cytometry: 1) flow rate, 
+2) signal acquisition, 3) dynamic range.
 }
 \examples{
 
-## a sample file
+## a sample dataset as flowSet object
 data(Bcells)
 
-## quality control
+## quality control on a flowFrame object
 flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_highQ = FALSE, folder_results = FALSE)
 
 }
 \author{
-Gianni Monaco
+Gianni Monaco, Chen Hao
 }
 

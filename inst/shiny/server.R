@@ -32,50 +32,40 @@ shinyServer(function(input, output, session) {
         word <- which(grepl("TIMESTEP", names(set()@description),
                             ignore.case = TRUE))
         timestep <- as.numeric(set()@description[[word[1]]])
+        if( !length(timestep) ){
+            warning("The timestep keyword was not found in the FCS file and it was set to 0.01. Graphs labels indicating time might not be correct", call. =FALSE)
+            timestep <- 0.01
+        }
         return(timestep)
     })
 
 
+    TimeChCheck <- reactive({
+        if (!is.null(timeChannel())) {
+            if (length(unique(exprs(set())[, timeChannel()])) == 1){
+                TimeChCheck <- "single_value"
+            }else{
+                TimeChCheck <- NULL 
+            }
+        }else{
+            TimeChCheck <- "NoTime"
+        }
+        return(TimeChCheck)
+    })
+
+    
     ## order fcs expression according acquisition time
     ordFCS <- reactive({
         if(is.null(set()))
             return(NULL)
-        ordFCS <- ord_fcs_time(set(), timeChannel())
-        return(ordFCS)
+        if(is.null(TimeChCheck())){
+          ordFCS <- ord_fcs_time(set(), timeChannel())
+        }else{
+          ordFCS <- set()
+        }
+      return(ordFCS)
     })
-
-
-    ## flow rate time slider UI
-    output$timeSlider <- renderUI({
-        if(is.null(set()) || is.null(cellCheck()))
-            return(NULL)
-        flowRateData <- cellCheck()[[1]]
-        mint <- min(flowRateData$frequencies[,3]) - 0.1
-        maxt <- max(flowRateData$frequencies[,3]) + 0.1
-        sliderInput("timeSlider", strong("Time cut:"),
-                    min = mint, max = maxt, value = c(mint, maxt), step = 0.1)
-    })
-
-
-    output$rateSlider <- renderUI({
-        if(is.null(set()) || is.null(cellCheck()))
-            return(NULL)
-        flowRateData <- cellCheck()[[1]]
-        minc <- min(flowRateData$frequencies[,4]) - 10
-        maxc <- max(flowRateData$frequencies[,4]) + 10
-        sliderInput("rateSlider", strong("Flow rate cut:"),
-                    min = minc, max = maxc, value = c(minc, maxc), step = 0.1)
-    })
-
-    output$signalBinSlider <- renderUI({
-        if(is.null(set()) || is.null(cellCheck()))
-            return(NULL)
-        flowSignalData <- cellCheck()[[2]]
-        maxb <- nrow(flowSignalData$exprsBin)
-        sliderInput("signalBinSlider", strong("Flow rate cut:"), width = "90%",
-                    min = 1, max = maxb, value = c(1, maxb), step = 1)
-    })
-
+    
 
     ## signal bin size UI
     output$signalBinSize <- renderUI({
@@ -85,9 +75,8 @@ shinyServer(function(input, output, session) {
         }else{
             maxSize <- nrow(ordFCS())
             optSize <- min(max(1, floor(maxSize/100)), 500)
-
         }
-        numericInput("signalBinSize", label = h5("Signal bin size (event number)"),
+        numericInput("signalBinSize", label = h5("Number of events per bin:"),
                      value = optSize, min = 1, max = maxSize)
     })
 
@@ -96,12 +85,15 @@ shinyServer(function(input, output, session) {
     cellCheck <- reactive({
         if(is.null(ordFCS()))
             return(NULL)
-
-        flowRateData <- flow_rate_bin(ordFCS(), second_fraction = input$timeLenth,
+        if(is.null(TimeChCheck())){
+         flowRateData <- flow_rate_bin(ordFCS(), second_fraction = input$timeLenth,
                                       timeCh = timeChannel(), timestep = timeStep())
-
-        flowSignalData <- flow_signal_bin(ordFCS(), channels = NULL, binSize = input$signalBinSize,
-                                          timeCh = timeChannel(), timestep = timeStep())
+        }else{
+            flowRateData <- list()
+        }
+        flowSignalData <- flow_signal_bin(ordFCS(), channels = NULL, 
+                                          binSize = input$signalBinSize, timeCh = timeChannel(), 
+                                          timestep = timeStep(), TimeChCheck = TimeChCheck() )
 
         flowMarginData <- flow_margin_check(ordFCS())
 
@@ -109,16 +101,45 @@ shinyServer(function(input, output, session) {
         return(res)
     })
 
-
+    ## flow rate time slider UI
+    output$timeSlider <- renderUI({
+        if(is.null(set()) || is.null(cellCheck()) || !is.null(TimeChCheck()))
+            return(NULL)
+        flowRateData <- cellCheck()[[1]]
+        mint <- min(flowRateData$frequencies[,3]) - 0.1
+        maxt <- max(flowRateData$frequencies[,3]) + 0.1
+        sliderInput("timeSlider", strong("Time cut:"),
+            min = mint, max = maxt, value = c(mint, maxt), step = 0.1)
+    })
+    
+    
+    output$rateSlider <- renderUI({
+        if(is.null(set()) || is.null(cellCheck()) || !is.null(TimeChCheck()))
+            return(NULL)
+        flowRateData <- cellCheck()[[1]]
+        minc <- min(flowRateData$frequencies[,4]) - 10
+        maxc <- max(flowRateData$frequencies[,4]) + 10
+        sliderInput("rateSlider", strong("Flow rate cut:"),
+            min = minc, max = maxc, value = c(minc, maxc), step = 0.1)
+    })
+    
+    output$signalBinSlider <- renderUI({
+        if(is.null(set()) || is.null(cellCheck()))
+            return(NULL)
+        flowSignalData <- cellCheck()[[2]]
+        maxb <- nrow(flowSignalData$exprsBin)
+        sliderInput("signalBinSlider", strong("Signal acquisition cut:"), width = "90%",
+            min = 1, max = maxb, value = c(1, maxb), step = 1)
+    })
 
     ## plot
     output$flowRatePlot <- renderPlot({
-        if(is.null(ordFCS()) || is.null(cellCheck()))
+        if(is.null(ordFCS()) || is.null(cellCheck()) || !is.null(TimeChCheck()))
             return(NULL)
-        flowRateData <- cellCheck()[[1]]
-        frp <- flow_rate_plot(flowRateData, input$rateSlider[1], input$rateSlider[2],
+          flowRateData <- cellCheck()[[1]]
+          frp <- flow_rate_plot(flowRateData, input$rateSlider[1], input$rateSlider[2],
                              input$timeSlider[1], input$timeSlider[2])
-        print(frp)
+          print(frp)
     })
 
     output$flowSignalPlot <- renderPlot({
@@ -146,9 +167,12 @@ shinyServer(function(input, output, session) {
         ordFCS <- ordFCS()
         totalCellNum <- nrow(ordFCS)
         origin_cellIDs <- 1:totalCellNum
-
-        FlowRateQC <- flow_rate_check(cellCheck()[[1]], input$rateSlider[1], input$rateSlider[2],
+        if(is.null(TimeChCheck())){
+          FlowRateQC <- flow_rate_check(cellCheck()[[1]], input$rateSlider[1], input$rateSlider[2],
                                       input$timeSlider[1], input$timeSlider[2])
+        }else{
+          FlowRateQC <- origin_cellIDs
+        }
         FlowSignalQC <- flow_signal_check(cellCheck()[[2]], input$signalBinSlider[1], input$signalBinSlider[2])
 
         if(input$checkbox[1] == TRUE){
@@ -195,7 +219,13 @@ shinyServer(function(input, output, session) {
     output$flowRateSummary <- renderText({
         if(is.null(checkRes()))
             return(NULL)
-        paste0("Percentage of low-Q events in flow rate check: ", round(checkRes()[[5]]*100,2), "%")
+        if(is.null(TimeChCheck())){
+          paste0("Percentage of low-Q events in flow rate check: ", round(checkRes()[[5]]*100,2), "%")
+        }else if(!is.null(TimeChCheck()) && TimeChCheck() == "NoTime"){
+            "It is not possible to recreate the flow rate because the time channel is missing."
+        }else if(!is.null(TimeChCheck()) && TimeChCheck() == "single_value"){
+          "It is not possible to recreate the flow rate because the time channel contains a single value."
+        }
     })
 
     output$flowSignalSummary <- renderText({

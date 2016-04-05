@@ -7,7 +7,7 @@ require(scales)
 require(ggplot2)
 
 # Guess which channel captures time in a exprs, flowFrame or flowset
-findTimeChannel <- function(xx, strict = FALSE) {
+findTimeChannel <- function(xx) {
     time <- grep("^Time$", colnames(xx), value = TRUE, ignore.case = TRUE)[1]
     if (is.na(time)) {
         if (is(xx, "flowSet") || is(xx, "ncdfFlowList"))
@@ -16,11 +16,8 @@ findTimeChannel <- function(xx, strict = FALSE) {
             cont <- apply(xx, 2, function(y) all(sign(diff(y)) >= 0))
             time <- names(which(cont))
     }
-    if (!length(time) && strict)
-        stop("Unable to identify time domain recording for this data.\n", "Please define manually.",
-             call. = FALSE)
-    if (length(time) > 1)
-        time <- character(0)
+    if (!length(time) || length(time) > 1)
+        time <- NULL
     return(time)
 }
 
@@ -41,7 +38,6 @@ ord_fcs_time <- function(x, timeCh= "Time"){
         return(x)
     }
 }
-
 
 
 flow_rate_bin <- function(x, second_fraction = 0.1, timeCh = "Time", timestep = 0.1){
@@ -115,7 +111,8 @@ flow_rate_check <- function(flowRateData, lowerRateThres, upperRateThres,
 
 
 
-flow_signal_bin <- function(x, channels = NULL, binSize=500, timeCh="Time", timestep=0.34) {
+flow_signal_bin <- function(x, channels = NULL, binSize=500, timeCh="Time", 
+    timestep=0.1, TimeChCheck = NULL) {
 
     if (is.null(channels) || missing(channels) || is.na(channels)) {
         parms <- setdiff(colnames(x), timeCh)
@@ -127,10 +124,14 @@ flow_signal_bin <- function(x, channels = NULL, binSize=500, timeCh="Time", time
 
     if (missing(binSize) || is.null(binSize) || is.na(binSize))
         binSize <- 500
-
+   
     ### Retriving time and expression info
     exp <- exprs(x)
-    timex <- exp[, timeCh]
+    if (!is.null(TimeChCheck)) {
+        timex <- seq(from = 0, length.out = nrow(x), by = 0.1)
+    }else{
+        timex <- exp[, timeCh]
+    }
     yy <- exp[, parms]  # channels data
     idx <- c(1:nrow(x))
     seconds <- timex * timestep
