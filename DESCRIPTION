@@ -1,8 +1,8 @@
 Package: flowAI
 Type: Package
 Title: Automatic and interactive quality control for flow cytometry data
-Version: 1.1.2
-Date: 2016-04-05
+Version: 1.1.3
+Date: 2016-05-20
 Author: Gianni Monaco, Chen Hao
 Description: The package is able to perform an automatic or interactive quality
     control on FCS data acquired using flow cytometry instruments. By evaluating

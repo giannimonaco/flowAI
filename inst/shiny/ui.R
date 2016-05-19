@@ -22,10 +22,12 @@ shinyUI(fluidPage(
                uiOutput("signalBinSize"),
 
                hr(),
-               h4("Output:"),
-               downloadButton('downloadGoodFCS', 'Download High Q file (FCS)'),
+               h4("Download Output:"),
+               downloadButton('downloadQCFCS',   'FCS with QC'),
                br(),
-               downloadButton('downloadBadFCS', 'Download Low Q file (FCS)'),
+               downloadButton('downloadGoodFCS', 'High Q FCS'),
+               br(),
+               downloadButton('downloadBadFCS',  'Low Q FCS'),
 
                hr(),
                div(style = "margin-top: 30px; width: 200px; ", HTML("Developed by")),
@@ -53,7 +55,7 @@ shinyUI(fluidPage(
 
                            tabPanel("Signal Acquisition", fluidPage(
                                hr(),
-                               textOutput("flowSignalSummary"),
+                              textOutput("flowSignalSummary"),
                                hr(),
                                uiOutput("signalBinSlider"),
                                hr(),

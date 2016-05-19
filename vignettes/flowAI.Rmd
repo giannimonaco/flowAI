@@ -100,7 +100,9 @@ However, it is possible to perform partial quality control on only one or two of
 
 ## Result evaluation
 The function `flow_auto_qc` generates a report for each FCS file, in both a graphic and tabular format, to evaluate the performance of the algorithms in the detection of the anomalies.  
-We suggest to run the automatic method first with default settings. If the results are not satisfying you can either modify the settings or use the interactive method `flow_iQC`.
+We suggest to run the automatic method first with default settings. If the results are not satisfying you can either modify the settings or use the interactive method `flow_iQC`. 
+After the quality control, the user can store a new FCS file containing an additional column indicating where the low quality events can be gated within the range of 10,000 and 20,000. 
+Alternatively a new FCS containing only the high quality events can be produced. 
 
 
 ## Case study: B cells from elderly individuals

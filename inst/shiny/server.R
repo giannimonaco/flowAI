@@ -12,7 +12,8 @@ shinyServer(function(input, output, session) {
         isolate({fcsFiles <- input$fcsFiles
                  if (is.null(fcsFiles))
                      return(NULL)
-                 set <- read.FCS(fcsFiles$datapath) })
+                 set <- read.FCS(fcsFiles$datapath)
+                 set@description$FILENAME <- fcsFiles$name})
         return(set)
     })
 
@@ -101,36 +102,69 @@ shinyServer(function(input, output, session) {
         return(res)
     })
 
-    ## flow rate time slider UI
+    
+    ## flow rate time slider UI and check sliders. if they are null, a default value is returned for the QC
+    sliders <- reactive({
+        flowRateData <- cellCheck()[[1]]
+        flowSignalData <- cellCheck()[[2]]
+        return(c(
+            min(flowRateData$frequencies[,3]) - 0.1,
+            max(flowRateData$frequencies[,3]) + 0.1,
+            min(flowRateData$frequencies[,4]) - 10,
+            max(flowRateData$frequencies[,4]) + 10,
+            0,
+            nrow(flowSignalData$exprsBin) + 1)
+            )
+    })
+    
     output$timeSlider <- renderUI({
         if(is.null(set()) || is.null(cellCheck()) || !is.null(TimeChCheck()))
             return(NULL)
-        flowRateData <- cellCheck()[[1]]
-        mint <- min(flowRateData$frequencies[,3]) - 0.1
-        maxt <- max(flowRateData$frequencies[,3]) + 0.1
         sliderInput("timeSlider", strong("Time cut:"),
-            min = mint, max = maxt, value = c(mint, maxt), step = 0.1)
+            min = sliders()[1], max = sliders()[2], 
+            value = c(sliders()[1], sliders()[2]), step = 0.1)
     })
-    
+    timeSlider <- reactive({
+        if(is.null(input$timeSlider)){
+            return(c(sliders()[1], sliders()[2]))
+        }else{
+            return(c(input$timeSlider[1],  input$timeSlider[2]))
+        }
+        
+    })
     
     output$rateSlider <- renderUI({
         if(is.null(set()) || is.null(cellCheck()) || !is.null(TimeChCheck()))
             return(NULL)
-        flowRateData <- cellCheck()[[1]]
-        minc <- min(flowRateData$frequencies[,4]) - 10
-        maxc <- max(flowRateData$frequencies[,4]) + 10
         sliderInput("rateSlider", strong("Flow rate cut:"),
-            min = minc, max = maxc, value = c(minc, maxc), step = 0.1)
+            min = sliders()[3], max = sliders()[4], 
+            value = c(sliders()[3], sliders()[4]), step = 0.1)
+    })
+    rateSlider <- reactive({
+        if(is.null(input$rateSlider)){
+            flowRateData <- cellCheck()[[1]]
+            return(c(sliders()[3], sliders()[4]))
+        }else{
+            return(c(input$rateSlider[1],  input$rateSlider[2]))
+        }
+        
     })
     
     output$signalBinSlider <- renderUI({
         if(is.null(set()) || is.null(cellCheck()))
             return(NULL)
-        flowSignalData <- cellCheck()[[2]]
-        maxb <- nrow(flowSignalData$exprsBin)
         sliderInput("signalBinSlider", strong("Signal acquisition cut:"), width = "90%",
-            min = 1, max = maxb, value = c(1, maxb), step = 1)
+            min = sliders()[5], max = sliders()[6], 
+            value = c(sliders()[5], sliders()[6]), step = 1)
     })
+    signalSlider <- reactive({
+        if(is.null(input$signalBinSlider)){
+            return(c(sliders()[5], sliders()[6]))
+        }else{
+            return(c(input$signalBinSlider[1],  input$signalBinSlider[2]))
+        }
+    }) 
+    
 
     ## plot
     output$flowRatePlot <- renderPlot({
@@ -159,6 +193,7 @@ shinyServer(function(input, output, session) {
     })
 
 
+    
     ## check results
     checkRes <- reactive({
         if(is.null(set()) || is.null(cellCheck()))
@@ -168,12 +203,12 @@ shinyServer(function(input, output, session) {
         totalCellNum <- nrow(ordFCS)
         origin_cellIDs <- 1:totalCellNum
         if(is.null(TimeChCheck())){
-          FlowRateQC <- flow_rate_check(cellCheck()[[1]], input$rateSlider[1], input$rateSlider[2],
-                                      input$timeSlider[1], input$timeSlider[2])
+          FlowRateQC <- flow_rate_check(cellCheck()[[1]], rateSlider()[1], rateSlider()[2],
+              timeSlider()[1], timeSlider()[2])
         }else{
           FlowRateQC <- origin_cellIDs
         }
-        FlowSignalQC <- flow_signal_check(cellCheck()[[2]], input$signalBinSlider[1], input$signalBinSlider[2])
+        FlowSignalQC <- flow_signal_check(cellCheck()[[2]], signalSlider()[1], signalSlider()[2])
 
         if(input$checkbox[1] == TRUE){
             FlowMarginQC <- cellCheck()[[3]]$goodCellIDs
@@ -199,8 +234,13 @@ shinyServer(function(input, output, session) {
         bad_sub_exprs <- sub_exprs[badCellIDs, ]
         badfcs <- flowFrame(exprs = bad_sub_exprs, parameters = params,description = keyval)
 
+        tempQCvector <- cellCheck()[[2]]
+        QCvector <- tempQCvector$cellBinID[,"binID"]
+        QCvector[badCellIDs] <- runif(length(badCellIDs), min=10000, max=20000) 
+        QCfcs <- addQC(QCvector, sub_exprs, params, keyval)
+        
         return(list(totalCellNum, totalBadPerc, goodfcs, badfcs,
-                    flowRatePerc, flowSignalPerc, flowMarginPerc))
+                    flowRatePerc, flowSignalPerc, flowMarginPerc, QCfcs))
     })
 
     ## summary text
@@ -241,7 +281,7 @@ shinyServer(function(input, output, session) {
     })
 
     file_base <- reactive({
-      file_ext <- description(ordFCS())$FIL
+      file_ext <- description(ordFCS())$FILENAME
       file_base <- sub("^([^.]*).*", "\\1", file_ext)
       return(file_base)
     })
@@ -277,6 +317,21 @@ shinyServer(function(input, output, session) {
         }
     )
 
+    ## download processed FCS files
+    output$downloadQCFCS <- downloadHandler(
+        filename = function(){
+            paste(file_base(), "_QC.fcs", sep='')
+        },
+        
+        content = function(file){
+            data <- checkRes()[[8]]
+            if(is.null(data)){
+                return(NULL)
+            }
+            write.FCS(data, file)
+            #tar(tarfile = file, files = tempdir)
+        }
+    )
+    
 })
-
 

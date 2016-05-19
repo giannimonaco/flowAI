@@ -8,8 +8,8 @@ flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
   second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
   ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200,
   max_cptFS = 3, ChFM = NULL, sideFM = "both", neg_valuesFM = 1,
-  html_report = "_QC", mini_report = "QCmini", fcs_highQ = "_HighQ",
-  fcs_lowQ = FALSE, folder_results = "resultsQC")
+  html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC",
+  fcs_highQ = FALSE, fcs_lowQ = FALSE, folder_results = "resultsQC")
 }
 \arguments{
 \item{fcsfiles}{It can be a character vector with the filenames of the FCS files,
@@ -78,21 +78,26 @@ indicated in the FCS file.}
 report of the quality control. The default is \code{"_QC"}. If you do not 
 want to generate a report use \code{FALSE}.}
 
-\item{mini_report}{Suffix to be added to the FCS filename to name the TXT 
+\item{mini_report}{Suffix to be added for the filename of the TXT 
 file containing the percentage of anomalies detected in each FCS file 
 analyzed. The default is \code{"_QCmini"}. If you do not want to generate 
 the mini report use \code{FALSE}.}
 
-\item{fcs_highQ}{Suffix to be added to the FCS filename to name the new FCS 
-containing only the events that passed the quality control. The default is 
-\code{"_HighQ"}. If you do not want to generate the high quality FCS file 
+\item{fcs_QC}{Suffix to be added for the filename of the new FCS 
+containing a new channel where the low quality events have a random value 
+between 10,000 to 20,000 (as for flowClean). The default is 
+\code{"_QC"}. If you do not want to generate the high quality FCS file 
 use \code{FALSE}.}
 
-\item{fcs_lowQ}{Suffix to be added to the FCS filename to name the new FCS 
+\item{fcs_highQ}{Suffix to be added for the filename of the new FCS 
+containing only the events that passed the quality control. The default 
+is \code{FALSE} and hence the high quality FCS file is not generated.}
+
+\item{fcs_lowQ}{Suffix to be added for the filename of the new FCS 
 containing only the events that did not pass the quality control. The default 
 is \code{FALSE} and hence the low quality FCS file is not generated.}
 
-\item{folder_results}{Character string used to name of the directory that 
+\item{folder_results}{Character string used to name the directory that 
 contains the results. The default is \code{"resultsQC"}. If you intend 
 to return the results in the main directory use \code{FALSE}.}
 }
@@ -100,8 +105,7 @@ to return the results in the main directory use \code{FALSE}.}
 A complete quality control is performed on flow cytometry data in FCS
 format. By default the analysis returns a directory named \code{resultsQC}
 containing:
-1. a set of new FCS files including only the events that passed the 
-quality control, 
+1. a set of new FCS files with a new parameter to gate out the low quality events
 2. a set of HTML reports, one for each FCS file, that include graphs and table 
 indicating where the anomalies were detected,
 3. a single TXT file reporting the percentage of events removed in each FCS file.
@@ -118,7 +122,7 @@ anomalies by checking three properties of flow cytometry: 1) flow rate,
 data(Bcells)
 
 ## quality control on a flowFrame object
-flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_highQ = FALSE, folder_results = FALSE)
+flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_QC = FALSE, folder_results = FALSE)
 
 }
 \author{
