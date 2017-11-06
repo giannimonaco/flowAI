@@ -325,9 +325,9 @@ cffilter <- function(x,pl=NULL,pu=NULL,root=FALSE,drift=FALSE,
     if(is.ts(xo))
     {
         tsp.x = tsp(xo)
-        x.cycle=ts(x.cycle,star=tsp.x[1],frequency=tsp.x[3])
-        x.trend=ts(x.trend,star=tsp.x[1],frequency=tsp.x[3])
-        x=ts(x,star=tsp.x[1],frequency=tsp.x[3])
+        x.cycle=ts(x.cycle,start=tsp.x[1],frequency=tsp.x[3])
+        x.trend=ts(x.trend,start=tsp.x[1],frequency=tsp.x[3])
+        x=ts(x,start=tsp.x[1],frequency=tsp.x[3])
     }
 
     if(type=="asymmetric")
@@ -403,9 +403,9 @@ Abuild <- function(nn,nq,g,root)
 	Q = -matrix(1,nn-1,nn)
 	##Q = tril(Q);
         Q[upper.tri(Q)] <- 0
-	F = matrix(0,1,nn-1)
-	F[(nn-1-nq):(nn-1)] = g[1:(nq+1)]
-	A[(nn-1),] = F%*%Q
+	Fm = matrix(0,1,nn-1)
+	Fm[(nn-1-nq):(nn-1)] = g[1:(nq+1)]
+	A[(nn-1),] = Fm%*%Q
 	##    construct last row of A
         A[nn,] = matrix(1,1,nn)
     }

@@ -16,4 +16,3 @@ The data is stored as a flowSet object, a class implemented in the flowCore
 package to handle FCS files in R.
 }
 \keyword{datasets}
-

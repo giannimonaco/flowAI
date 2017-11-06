@@ -13,6 +13,11 @@
 #' \code{"FR_FS", "FR_FM", "FS_FM", "FR", "FS", "FM"}, to remove the anomalies only 
 #' on a subset of the steps where \emph{FR} stands for the flow rate, \emph{FS} stands
 #' for signal acquisition and \emph{FM} stands for dynamic range.
+#' @param output Set it to 1 to return a flowFrame or a flowSet with high quality events only.
+#' Set it to 2 to return a flowFrame or a flowSet with an additional 
+#' parameter where the low quality events have a value higher than 10,000. 
+#' Set it to 3 to return  a list with the IDs of low quality cells. Set it to any other
+#' value if no R object has to be returned. Default is \code{1}.
 #' @param timeCh Character string corresponding to the name of the Time Channel
 #' in the set of FCS files. By default is \code{NULL} and the name is retrieved
 #' automatically.
@@ -57,15 +62,14 @@
 #' @param html_report Suffix to be added to the FCS filename to name the HTML 
 #' report of the quality control. The default is \code{"_QC"}. If you do not 
 #' want to generate a report use \code{FALSE}.
-#' @param mini_report Suffix to be added for the filename of the TXT 
-#' file containing the percentage of anomalies detected in each FCS file 
+#' @param mini_report Name for the TXT file containing the percentage of 
+#' anomalies detected in the set of FCS files 
 #' analyzed. The default is \code{"_QCmini"}. If you do not want to generate 
 #' the mini report use \code{FALSE}.
 #' @param fcs_QC Suffix to be added for the filename of the new FCS 
-#' containing a new channel where the low quality events have a random value 
-#' between 10,000 to 20,000 (as for flowClean). The default is 
-#' \code{"_QC"}. If you do not want to generate the high quality FCS file 
-#' use \code{FALSE}.
+#' containing a new parameter where the low quality events only have a value 
+#' higher than 10,000. The default is \code{"_QC"}. 
+#' If you do not want to generate the high quality FCS file use \code{FALSE}.
 #' @param fcs_highQ Suffix to be added for the filename of the new FCS 
 #' containing only the events that passed the quality control. The default 
 #' is \code{FALSE} and hence the high quality FCS file is not generated.
@@ -74,13 +78,18 @@
 #' is \code{FALSE} and hence the low quality FCS file is not generated.
 #' @param folder_results Character string used to name the directory that 
 #' contains the results. The default is \code{"resultsQC"}. If you intend 
-#' to return the results in the main directory use \code{FALSE}.
+#' to return the results in the working directory use \code{FALSE}.
 #' @return A complete quality control is performed on flow cytometry data in FCS
-#' format. By default the analysis returns a directory named \code{resultsQC}
-#' containing:
-#' 1. a set of new FCS files with a new parameter to gate out the low quality events
-#' 2. a set of HTML reports, one for each FCS file, that include graphs and table 
-#' indicating where the anomalies were detected,
+#' format. By default the analysis returns:
+#' 
+#' 1. a flowFrame or flowSet object containing new FCS files with only high quality events
+#' 
+#' and a directory named \var{resultsQC} containing:
+#' 
+#' 1. a set of new FCS files with a new parameter to gate out the low quality events a value larger than 10,000 is assigned to them only,
+#' 
+#' 2. a set of HTML reports, one for each FCS file, that include graphs and table indicating where the anomalies were detected, 
+#' 
 #' 3. a single TXT file reporting the percentage of events removed in each FCS file.
 #' 
 #' @author Gianni Monaco, Chen Hao 
@@ -90,17 +99,21 @@
 #' data(Bcells)
 #'
 #' ## quality control on a flowFrame object
-#' flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_QC = FALSE, folder_results = FALSE)
+#' resQC <- flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_QC = FALSE, folder_results = FALSE)
 #'
 #' @import flowCore
 #' @import ggplot2
 #' @import plyr
-#' @importFrom changepoint cpt.meanvar
-#' @importFrom scales pretty_breaks
 #' @import knitr
 #' @import reshape2
+#' @importFrom changepoint cpt.meanvar
+#' @importFrom scales pretty_breaks
+#' @importFrom graphics hist legend lines
+#' @importFrom methods as is new
+#' @importFrom stats convolve frequency is.ts mad median na.omit qt runif ts tsp
+#' @importFrom utils write.table
 #' @export
-flow_auto_qc <- function(fcsfiles, remove_from = "all",
+flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
      timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE, 
      ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200, 
      max_cptFS = 3, ChFM = NULL, sideFM = "both", neg_valuesFM = 1, 
@@ -115,13 +128,12 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
   }else if( class(fcsfiles) == "flowFrame" ){
     set <- as(fcsfiles,"flowSet")
   }else{
-   stop("Use as first argument a flowSet or a character vector with the name of the fcs files to analyse")
+   stop("As first argument, use a flowSet or a character vector with the path of the FCS files")
   }
 
   N_cell_set <- flow_set_qc(set)
   area.color <- rep("red", length(set))
 
-  FSbinSize <- min(max(1, floor(median(fsApply(set, nrow)/100))), 500)
   if (missing(timeCh) || is.null(timeCh)) {
     timeCh <- findTimeChannel(set[[1]])
   }
@@ -146,22 +158,22 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
   }
   
   if(folder_results != FALSE){
+      folder_results <- strip.sep(folder_results)
       dir.create(folder_results, showWarnings = FALSE)
-  }
+      folder_results <- paste0(folder_results, .Platform$file.sep)
+  } else { folder_results <- ""}
+  
+  out <- list()
   
   for (i in 1:length(set)) {
-
-    filename_ext <- description(set[[i]])$FILENAME
+    filename_ext <- basename(description(set[[i]])$FILENAME)
     filename <- sub("^([^.]*).*", "\\1", filename_ext)
+
     if (html_report != FALSE) {
-        reportfile <- paste0(getwd(), .Platform$file.sep, 
-            ifelse(folder_results != FALSE, paste0(folder_results, .Platform$file.sep), ""),
-            filename, html_report, ".html")
+        reportfile <- paste0(folder_results,filename, html_report, ".html")
     }
     if (mini_report != FALSE) {
-        minireport <- paste0(getwd(), .Platform$file.sep, 
-            ifelse(folder_results != FALSE, paste0(folder_results, .Platform$file.sep), ""),
-            mini_report, ".txt")
+        minireport <-  paste0(folder_results, mini_report, ".txt")
         if(!file.exists(minireport)){
             write.table(t(c("Name file", "n. of events", "% anomalies", "analysis from",
                 "% anomalies flow Rate",  "% anomalies Signal",  "% anomalies Margins")),
@@ -169,21 +181,15 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
         }
     }
     if (fcs_QC != FALSE) {
-        QC.fcs.file <- paste0(getwd(), .Platform$file.sep,
-            ifelse(folder_results != FALSE, paste0(folder_results, .Platform$file.sep), ""),
-            filename, fcs_QC, ".fcs")
+        QC.fcs.file <- paste0(folder_results, filename, fcs_QC, ".fcs")
     }
     if (fcs_highQ != FALSE) {
-        good.fcs.file <- paste0(getwd(), .Platform$file.sep,
-            ifelse(folder_results != FALSE, paste0(folder_results, .Platform$file.sep), ""),
-            filename, fcs_highQ, ".fcs")
+        good.fcs.file <- paste0(folder_results, filename, fcs_highQ, ".fcs")
     }
     if (fcs_lowQ != FALSE) {
-        bad.fcs.file <- paste0(getwd(), .Platform$file.sep,
-            ifelse(folder_results != FALSE, paste0(folder_results, .Platform$file.sep), ""),
-            filename, fcs_lowQ, ".fcs")
+        bad.fcs.file <- paste0(folder_results,filename, fcs_lowQ, ".fcs")
     }
-
+    cat(paste0("Quality control for the file: ", filename, "\n"))
     # select different color for the analyzed FCS in the set plot
     area <- area.color
     area[i] <- "blue"
@@ -191,7 +197,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
     # check the time channel of the file
     if (!is.null(timeCh)) {
         if (length(unique(exprs(set[[i]])[, timeCh])) == 1){
-            cat("The time channel contain a single value. It cannot be used to recreate the flow rate. \n")
+            cat("The time channel contains a single value. It cannot be used to recreate the flow rate. \n")
             warning(paste0("The time channel in ", filename_ext, " contains a single value. It cannot be used to recreate the flow rate. \n"), call. =FALSE)
             TimeChCheck <- "single_value"
         }else{
@@ -201,7 +207,9 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
         TimeChCheck <- "NoTime"
     }
     
-    # order FCS file is a proper Time channel is present
+    # get the size of the bins
+    FSbinSize <- min(max(1, ceiling(nrow(set[[1]])/100)), 500)   
+    # order events in the FCS file if a proper Time channel is present
     if (is.null(TimeChCheck)) {
       ordFCS <- ord_fcs_time(set[[i]], timeCh)
     }else{ 
@@ -257,27 +265,22 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
 
       badCellIDs <- setdiff(origin_cellIDs, goodCellIDs)
       totalBadPerc <- round(length(badCellIDs)/length(origin_cellIDs), 4)
-      if (fcs_QC != FALSE || fcs_highQ != FALSE || fcs_lowQ != FALSE) {
-        sub_exprs <- exprs(ordFCS)
-        params <- parameters(ordFCS)
-        keyval <- keyword(ordFCS)
+      sub_exprs <- exprs(ordFCS)
+      params <- parameters(ordFCS)
+      keyval <- keyword(ordFCS)
+      if (fcs_highQ != FALSE || output == 1) {
+          goodfcs <- flowFrame(exprs = sub_exprs[goodCellIDs, ], parameters = params, description = keyval)
+          if (fcs_highQ != FALSE) {suppressWarnings(write.FCS(goodfcs, good.fcs.file)) }
       }
-      if (fcs_QC != FALSE ){
+      if (fcs_QC != FALSE || output == 2 ){
           QCvector <- FlowSignalData$cellBinID[,"binID"]
+          if(length(QCvector) > 9000) QCvector <- runif(length(QCvector), min=1, max=9000)
           QCvector[badCellIDs] <- runif(length(badCellIDs), min=10000, max=20000) 
           newFCS <- addQC(QCvector, remove_from, sub_exprs, params, keyval)
-          suppressWarnings(write.FCS(newFCS, QC.fcs.file))  
+          if (fcs_QC != FALSE){ suppressWarnings(write.FCS(newFCS, QC.fcs.file)) }
       }
-      if (length(badCellIDs) > 0 & fcs_highQ != FALSE) {
-      good_sub_exprs <- sub_exprs[goodCellIDs, ]
-      goodfcs <- flowFrame(exprs = good_sub_exprs,
-        parameters = params, description = keyval)
-    suppressWarnings(write.FCS(goodfcs, good.fcs.file))
-    }
-    if (length(badCellIDs) > 0 & fcs_lowQ != FALSE) {
-      bad_sub_exprs <- sub_exprs[badCellIDs, ]
-      badfcs <- flowFrame(exprs = bad_sub_exprs,
-        parameters = params,description = keyval)
+    if (length(badCellIDs) > 0 && fcs_lowQ != FALSE) {
+      badfcs <- flowFrame(exprs = sub_exprs[badCellIDs, ],parameters = params,description = keyval)
       suppressWarnings(write.FCS(badfcs, bad.fcs.file))
     }
     if (mini_report != FALSE) {
@@ -294,7 +297,22 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all",
                ordFCS@parameters$name, value = TRUE))
        }
        template_path <- system.file("rmd","autoQC_report.Rmd", package='flowAI')
-       knit2html(template_path, output = reportfile, force_v1 = TRUE)
+       knit2html(template_path, output = reportfile, force_v1 = TRUE, quiet = TRUE)
+    #   file.remove("autoQC_report.md")
+    #   unlink("figure", recursive = TRUE)
      }
+      if(output == 1){
+          out <- c(out, goodfcs)
+      }else if ( output == 2){
+          out <- c(out, newFCS)
+      }else if( output == 3 ){
+          out[[i]] <- badCellIDs
+          names(out)[i] <- filename
+      }
   }
+  if( output == 1 || output == 2){ 
+      if(length(out) == 1){ return( out[[1]] )
+      }else{  return(as(out, "flowSet"))  }
+  }
+  if( output == 3 ){ return(out) } 
 }

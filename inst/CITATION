@@ -1,0 +1,24 @@
+citHeader("To cite the R package 'flowAI' in your publication please use:")
+
+citEntry(entry  = "article",
+         title  = "flowAI: automatic and interactive anomaly discerning tools for flow cytometry data",
+         author = personList(
+                 person(first="Gianni", last="Monaco"),
+                 person(first="Hao", last="Chen"),
+                 person(first="Michael", last="Poidinger"),
+                 person(first="Jinmiao", last="Chen"),
+                 person(first="João Pedro", last="de Magalhães"),
+                 person(first="Anis", last="Larbi")
+			),
+         journal = "Bioinformatics",
+         year = "2016",
+         doi  = "10.1093/bioinformatics/btw191 ",
+         note = paste("R package version ", R.Version()$major, ".", R.Version()$minor, sep = ""),
+         textVersion = paste("Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly discerning tools for flow cytometry data. Bioinformatics.")
+	)
+
+
+citFooter("This free open-source software implements academic
+research by the authors and co-workers. If you use it,
+please support the project by citing the appropriate 
+journal articles.")

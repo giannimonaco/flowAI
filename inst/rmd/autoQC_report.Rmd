@@ -6,9 +6,8 @@ output: html_document
 
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(cache=FALSE)
-opts_chunk$set(fig.align='center', out.width='750px', dpi=200)  #out.width='750px', dpi=200
-#opts_chunk$set(dev = 'pdf')
+opts_chunk$set(fig.align='center', out.width='750px', dpi=200)  # , dev = c('png', 'pdf')
+opts_knit$set(progress=FALSE)
 ```
 
 ## FCS file information
@@ -78,7 +77,7 @@ flow_signal_plot(FlowSignalQC)
 
 The more stable region selected consistent for all channels is highlighted in yellow. If the removal of outliers has been required before the execution of the changepoint analysis, the detected outliers are cicled in green.
 
-The FCS file was divided in `r FlowSignalData$bins` bins. The stable region is located between the bins `r FlowSignalQC$segm[1]` and `r FlowSignalQC$segm[2]`.
+The FCS file was divided in `r FlowSignalData$bins` bins, hence each bin contains `r  ceiling(nrow(set[[i]])/FlowSignalData$bins)` event(s). The stable region is located between the bins `r FlowSignalQC$segm[1]` and `r FlowSignalQC$segm[2]`.
 
 ##### More info on the changepoints detected:
 

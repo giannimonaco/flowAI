@@ -52,14 +52,14 @@ fcsfiles <- dir(".", pattern="*fcs$")
 
 #### Automatic method
 The automatic method is implemented in the function `flow_auto_qc`. 
-The following calls show how to perform the quality control with default 
-settings on the FCS files in your folder and in the toy dataset that comes with the FlowAI packages.
+The following examples show how to perform the quality control with default 
+settings on the FCS files stored in your folder and in the toy dataset that comes with the FlowAI package.
 The flowAI package depends on the flowCore package for the handling of the FCS files in the R environment. The flowCore package provides two main classes, `flowFrame` and `flowSet`. The `Bcells` object is an instance of the `flowSet` class and contains a set of three FCS files that taken singuarly are instances of the `flowFrame` object.  The `flow_auto_qc` function can be called on either one of the flowCore objects, `flowSet` and `flowFrame`, and on a character vector of the fcs files:
 
 ```{r, eval=FALSE}
-resQC <- flow_auto_qc(Bcells)  # using a flowSet
-resQC <- flow_auto_qc(Bcells[[1]]) # using a flowFrame
-resQC <- flow_auto_qc(fcsfiles) # using a character vector
+flow_auto_qc(Bcells)  # using a flowSet
+flow_auto_qc(Bcells[[1]]) # using a flowFrame
+flow_auto_qc(fcsfiles) # using a character vector
 ```
 
 When a character vector is used to call the `flow_auto_qc` function, a `flowSet` object is automatically generated since the creation of the histogram for the cell number comparison depends on it. 
@@ -77,10 +77,9 @@ batches <- cut(cums, groups)
 Then you can run your analysis on the batches using a for-loop:
 ```{r, eval=FALSE}
 for(i in 1:groups){
-    flow_auto_qc(fcsfiles[which(batches == levels(batches)[i])], output = 0) 
+    flow_auto_qc(fcsfiles[which(batches == levels(batches)[i])]) 
 }
 ```
-When setting the *output* argument to 0 (or any other value apart 1 and 2), no R objects are returned.
 
 #### Interactive method
 The interactive method is implemented as a Shiny app and is executed through 
@@ -91,28 +90,27 @@ Once you open the Shiny app on your web browser, you can upload the FCS file fro
 
 ## Quality control
 The full pipeline of our quality control procedure includes the removal of events having
-anomalous values when looking at three aspect of a flow cytometry analysis: 
- 
-1. flow rate  
-2. signal acquisition  
+anomalous values when looking at three aspect of a flow cytometry analysis:  
+1. flow rate,  
+2. signal acquisition 
 3. dynamic range
 
 However, it is possible to perform partial quality control on only one or two of the above mentioned properties. For the automatic method, this can be set with the argument `remove_from`.
-After the quality control, the automatic method generates by default a new FCS file containing an additional parameter where the low quality events have a value higher than 10,000, similarly to the flowClean flagging method. Alternatively, a new FCS containing only the high quality events can be generated. 
-Moreover, flowAI can be implemented in automatic pipelines of analysis through the returned objects of the `flowFrame` or `flowSet` class
 
 ## Result evaluation
 The function `flow_auto_qc` generates a report for each FCS file, in both a graphic and tabular format, to evaluate the performance of the algorithms in the detection of the anomalies.  
-We suggest to run the automatic method first with default settings. If the results are not satisfying you can either modify the settings or use the interactive method `flow_iQC`. 
+We suggest to run the automatic method first with default settings. If the results are not satisfying you can either modify the settings or use the interactive method `flow_iQC`.
+After the quality control, the user can store a new FCS file containing an additional column indicating where the low quality events can be gated within the range of 10,000 and 20,000. Alternatively a new FCS containing only the high quality events can be produced.
+An other option is to implement flowAI in automatic pipelines of analysis as the function `flow_auto_qc` will also returns `flowFrame` or `flowSet` objects with high quality data only. However, it is still necessary to evaluate the html reports at the end of the analysis. 
 
 ## Case study: B cells from elderly individuals
 
 Here, we give an example of the results obtained after performing the quality control on the first FCS file of the Bcells dataset.
 
 #### File description and quality control summary
-The summary information of the FCS file analyzed is reported in the first section of the automatically generated report or on the left hand side panel of the `flow_iQC` Shiny app. The summary information contains the name of the file, the number of events and the total percentage of anomalies detected and removed.
+The summary information of the FCS file analyzed is reported in the first section of the automatically generated report or on the left hand side panel of the `flow_iQC` Shiny app. It contains the name of the file, the number of events and the total percentage of anomalies detected and removed.
 
-The following information were obtained from the automatically generated report of our example:
+The following information were obtained from the automatically generated report:
 
 > Input File Name: Bcells1    
 > Number of Events: 64562  
@@ -121,7 +119,7 @@ The following information were obtained from the automatically generated report 
 > Number of high quality events: 49535
 
 ##### Comparison of the number of events among the FCS files of the dataset
-If the dataset has more than three FCS files, the automatic method will produce a histogram containing the number of events for each file. The bar in blue correspond to the FCS file whose quality control analysis is described in the remaining part of the report.
+If the dataset has more than three FCS files, the automatic method will produce a histogram containing the number of events for each file. The blue bar correspond to the FCS file reported in the HTML file.
 
 ![hist_set](hist_set.png)
 
@@ -148,5 +146,4 @@ For this step, both `flow_auto_qc` and `flow_iQC` use the same detection princip
 When using the automatic method to refine the lower limit of the dynamic range, with the `neg_valueFM` argument you can decide to truncate the negative values to the cut-off suggested in the FCS file instead of the removing the negative outliers. 
 
 ![margins](margins.png)
-
 

@@ -1,3 +1,9 @@
+## remove last slash if present
+strip.sep <- function(name) {
+    ifelse(substr(name,nchar(name),nchar(name))==.Platform$file,
+        substr(name,1,nchar(name)-1),name)
+}
+
 # Guess which channel captures time in a exprs, flowFrame or flowset
 findTimeChannel <- function(xx) {
     time <- grep("^Time$", colnames(xx), value = TRUE, ignore.case = TRUE)[1]
@@ -63,3 +69,4 @@ addQC <- function(QCvector, remove_from, sub_exprs, params, keyval){
     description(outFCS)[flowCorePnRmin] <- 0
     outFCS
 }  
+

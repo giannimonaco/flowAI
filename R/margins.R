@@ -94,7 +94,7 @@ flow_margin_check <- function(x,  margin_channels = NULL,
   goodCellIDs <- setdiff(xx, badCellIDs)
   badPerc <- round(length(badCellIDs)/lenx, 4)
 
-  cat(paste0(100 * badPerc, "% of anomalous cells detected in the dynamic range margins. \n"))
+  cat(paste0(100 * badPerc, "% of anomalous cells detected in the dynamic range check. \n"))
 
   params <- parameters(x)
   keyval <- keyword(x)

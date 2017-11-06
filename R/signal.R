@@ -33,9 +33,6 @@ flow_signal_bin <- function(x, channels = NULL, binSize = 500,
   uniSeconds <- unique(seconds)  # num of unique time tick
   nrBins <- floor(lenSec/binSize)  # num of bins
 
-  if (length(uniSeconds) < nrBins || lenSec < binSize)
-    stop("Improper bin size")
-
   cf <- c(rep(1:nrBins, each = binSize), rep(nrBins + 1, lenSec - nrBins * binSize))  # id bins
   stopifnot(length(cf) == lenSec)
   tmpx <- split(seconds, cf)
@@ -54,6 +51,11 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
 
   fs_cellBinID <- FlowSignalData$cellBinID
   fs_res <- FlowSignalData$exprsBin
+  ### log transformation. 
+  # fs_res[which(fs_res <= 1 & fs_res >= -1)] <- 0
+  # fs_res[which(fs_res > 1)] <- log(fs_res[which(fs_res > 1)])
+  # fs_res[which(fs_res < -1)] <- -log(abs(fs_res[which(fs_res < -1)]))
+  
   teCh <- grep("Time|time|TIME|Event|event|EVENT", colnames(fs_res), value = TRUE)
   parms <- setdiff(colnames(fs_res), teCh)
 
@@ -67,8 +69,8 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   if (!is.null(ChannelRemove)) {
     ChannelRemove_COMP <- grep(paste(ChannelRemove, collapse="|"),
                       colnames(fs_res), value = TRUE)
-    cat(paste0("The channel removed from the signal check are: ",
-      paste(ChannelRemove_COMP, collapse = ", "), ". \n"))
+  #  cat(paste0("The channels whose signal acquisition will not be checked are: ", 
+   #   paste(ChannelRemove_COMP, collapse = ", "), ". \n"))
     parms <- setdiff(parms, ChannelRemove_COMP)
   }
 
@@ -81,10 +83,10 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
         return(x)
       })
       badPerc_out <- round((length(FS_out)/nrow(fs_res)),4)
-      cat(paste0(badPerc_out * 100, "% of outliers found in channels' signal. \n"))
+     # cat(paste0(badPerc_out * 100, "% of outliers found in channels' signal. \n"))
     }else{
       fs_res_adj <- fs_res[,parms]
-      cat("0% of outliers found in channels' signal. \n")
+    #  cat("0% of outliers found in channels' signal. \n")
       badPerc_out <- 0
     }
 
@@ -93,6 +95,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
              penalty =  "Manual" , test.stat = "Normal",
              method = "BinSeg", param.estimates = FALSE))
   }else{
+
   cpt_res <- suppressWarnings(cpt.meanvar(t(fs_res[, parms]),
       pen.value = pen_valueFS, Q = maxSegmentFS,
       penalty =  "Manual" , test.stat = "Normal",
@@ -125,8 +128,8 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
     ch_no_cpt <- nam_cpt[zero_cpt]
     tab_cpt <- NULL
   }else{
-    cat(paste("Changepoint(s) detected in the channels: ",
-    paste(names(len_cpt[nozero_cpt]), collapse = ", "), sep = ""), fill = TRUE)
+   # cat(paste("Changepoint(s) detected in the channels: ",
+   # paste(names(len_cpt[nozero_cpt]), collapse = ", "), sep = ""), fill = TRUE)
     ch_cpt <- list_seg[nozero_cpt]
     ch_no_cpt <- nam_cpt[zero_cpt]
 
@@ -141,7 +144,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   # percentage bad cell detected with the changepoint method
   badPerc_cp <- round(1 - ((max_seg[2] - max_seg[1])/(length(fs_res[, 1]) - 1)),4)
 
-  cat(paste0(100 * badPerc_cp, "% of anomalous cells detected in signal check. \n"))
+  cat(paste0(100 * badPerc_cp, "% of anomalous cells detected in signal acquisition check. \n"))
  
   # retrieve ID of good cells
   if(outlier_remove){
@@ -158,7 +161,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   sub_exprs <- sub_exprs[goodCellIDs, ]  ## check if the Id Correspond!
   newx <- flowFrame(exprs = sub_exprs, parameters = params, description = keyval)
 
-  return(list(FSnewFCS = newx, exprsBin = fs_res, Perc_bad_cells = data.frame(badPerc_tot,badPerc_cp, badPerc_out),
+  return(list(FSnewFCS = newx, exprsBin = FlowSignalData$exprsBin, Perc_bad_cells = data.frame(badPerc_tot,badPerc_cp, badPerc_out),
         goodCellIDs = goodCellIDs, tab_cpt = tab_cpt, ch_no_cpt =ch_no_cpt,
         segm = max_seg, FS_out = FS_out, outlier_remove = outlier_remove))
 }
@@ -197,17 +200,17 @@ flow_signal_plot <- function(FlowSignalQC) {
   data$binID <- binID
   longdata <- melt(data, id.vars = "binID", variable.name = "marker",
     value.name = "value")
-  FS_graph <- ggplot(longdata, aes(x = binID, y = value, col = marker),
+  FS_graph <- ggplot(longdata, aes_string(x = "binID", y = "value", col = "marker"),
       environment = environment()) + labs(x = "Bin ID",
       y = "Median Intensity value") +
-      geom_line() + facet_grid(marker ~ ., scales = "free") + theme_bw() +
+      facet_grid(marker ~ ., scales = "free") + theme_bw() +
       theme(strip.text.y = element_text(angle = 0,
       hjust = 1), axis.text.y = element_text(size = 6),
       legend.position = "none") +
       scale_x_continuous(breaks= pretty_breaks(n =10)) +
       scale_y_continuous(breaks= pretty_breaks(n =3)) +
       geom_rect(aes(xmin = segm[1], xmax = segm[2], ymin = -Inf,
-      ymax = Inf), fill = "orange", linetype = 0, alpha = 0.005)  # modify alpha to regulate the transparence
+      ymax = Inf), fill = "khaki1", linetype = 0) + geom_line()
   # Add anoms to the plot as circles.
   if(outlier_remove){
     longdata_out <- melt(data[FS_out,], id.vars = "binID",

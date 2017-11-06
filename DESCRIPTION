@@ -1,21 +1,21 @@
 Package: flowAI
 Type: Package
 Title: Automatic and interactive quality control for flow cytometry data
-Version: 1.7.0
-Date: 2016-05-20
-Author: Gianni Monaco, Chen Hao
+Version: 1.6.1
+Date: 2017-11-06
+Author: Gianni Monaco, Hao Chen
 Description: The package is able to perform an automatic or interactive quality
     control on FCS data acquired using flow cytometry instruments. By evaluating
     three different properties: 1) flow rate, 2) signal acquisition, 3) dynamic
     range, the quality control enables the detection and removal of anomalies.
-Depends: R (>= 3.2)
+Depends: R (>= 3.4)
 License: GPL
 LazyData: TRUE
 biocViews: FlowCytometry, QualityControl, BiomedicalInformatics
 Imports: ggplot2, flowCore, plyr, changepoint, knitr, reshape2,
-        RColorBrewer, scales
+        RColorBrewer, scales, methods, graphics, stats, utils
 Suggests: testthat, shiny, rmarkdown
 Maintainer: Gianni Monaco <gianni@liverpool.ac.uk>
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 NeedsCompilation: no

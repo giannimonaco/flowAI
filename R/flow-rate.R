@@ -16,8 +16,8 @@ flow_rate_bin <- function(x, second_fraction = 0.1, timeCh = timeCh,
 
   lenx <- length(xx)  # num of time ticks
 
-  tbins <- seq(0, endsec/timestep, by = second_fraction/timestep)  # time bins
-  secbin <- seq(0, endsec, by = second_fraction)  # bin expressed in seconds
+  tbins <- seq(0, endsec/timestep, by = as.numeric(second_fraction)/timestep)  # time bins
+  secbin <- seq(0, endsec, by = as.numeric(second_fraction))  # bin expressed in seconds
   minbin <- round(secbin/60, 3)  # bin expressed in minutes
   nrBins <- length(tbins) - 1
   tbCounts <- c(0, hist(xx, tbins, plot = FALSE)$counts)  # number of events per time bin

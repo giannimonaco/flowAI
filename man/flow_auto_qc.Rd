@@ -4,7 +4,7 @@
 \alias{flow_auto_qc}
 \title{Automatic quality control of flow cytometry data.}
 \usage{
-flow_auto_qc(fcsfiles, remove_from = "all", timeCh = NULL,
+flow_auto_qc(fcsfiles, remove_from = "all", output = 1, timeCh = NULL,
   second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
   ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200,
   max_cptFS = 3, ChFM = NULL, sideFM = "both", neg_valuesFM = 1,
@@ -21,6 +21,12 @@ anomalies from all the three steps. Alternatively, you can use:
 \code{"FR_FS", "FR_FM", "FS_FM", "FR", "FS", "FM"}, to remove the anomalies only 
 on a subset of the steps where \emph{FR} stands for the flow rate, \emph{FS} stands
 for signal acquisition and \emph{FM} stands for dynamic range.}
+
+\item{output}{Set it to 1 to return a flowFrame or a flowSet with high quality events only.
+Set it to 2 to return a flowFrame or a flowSet with an additional 
+parameter where the low quality events have a value higher than 10,000. 
+Set it to 3 to return  a list with the IDs of low quality cells. Set it to any other
+value if no R object has to be returned. Default is \code{1}.}
 
 \item{timeCh}{Character string corresponding to the name of the Time Channel
 in the set of FCS files. By default is \code{NULL} and the name is retrieved
@@ -78,16 +84,15 @@ indicated in the FCS file.}
 report of the quality control. The default is \code{"_QC"}. If you do not 
 want to generate a report use \code{FALSE}.}
 
-\item{mini_report}{Suffix to be added for the filename of the TXT 
-file containing the percentage of anomalies detected in each FCS file 
+\item{mini_report}{Name for the TXT file containing the percentage of 
+anomalies detected in the set of FCS files 
 analyzed. The default is \code{"_QCmini"}. If you do not want to generate 
 the mini report use \code{FALSE}.}
 
 \item{fcs_QC}{Suffix to be added for the filename of the new FCS 
-containing a new channel where the low quality events have a random value 
-between 10,000 to 20,000 (as for flowClean). The default is 
-\code{"_QC"}. If you do not want to generate the high quality FCS file 
-use \code{FALSE}.}
+containing a new parameter where the low quality events only have a value 
+higher than 10,000. The default is \code{"_QC"}. 
+If you do not want to generate the high quality FCS file use \code{FALSE}.}
 
 \item{fcs_highQ}{Suffix to be added for the filename of the new FCS 
 containing only the events that passed the quality control. The default 
@@ -99,15 +104,20 @@ is \code{FALSE} and hence the low quality FCS file is not generated.}
 
 \item{folder_results}{Character string used to name the directory that 
 contains the results. The default is \code{"resultsQC"}. If you intend 
-to return the results in the main directory use \code{FALSE}.}
+to return the results in the working directory use \code{FALSE}.}
 }
 \value{
 A complete quality control is performed on flow cytometry data in FCS
-format. By default the analysis returns a directory named \code{resultsQC}
-containing:
-1. a set of new FCS files with a new parameter to gate out the low quality events
-2. a set of HTML reports, one for each FCS file, that include graphs and table 
-indicating where the anomalies were detected,
+format. By default the analysis returns:
+
+1. a flowFrame or flowSet object containing new FCS files with only high quality events
+
+and a directory named \var{resultsQC} containing:
+
+1. a set of new FCS files with a new parameter to gate out the low quality events a value larger than 10,000 is assigned to them only,
+
+2. a set of HTML reports, one for each FCS file, that include graphs and table indicating where the anomalies were detected, 
+
 3. a single TXT file reporting the percentage of events removed in each FCS file.
 }
 \description{
@@ -122,10 +132,9 @@ anomalies by checking three properties of flow cytometry: 1) flow rate,
 data(Bcells)
 
 ## quality control on a flowFrame object
-flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_QC = FALSE, folder_results = FALSE)
+resQC <- flow_auto_qc(Bcells[[1]], html_report = FALSE, mini_report = FALSE, fcs_QC = FALSE, folder_results = FALSE)
 
 }
 \author{
 Gianni Monaco, Chen Hao
 }
-

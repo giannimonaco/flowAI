@@ -36,6 +36,9 @@
 
 
 anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, use_decomp = TRUE, period=1, verbose = FALSE){
+      
+    idNOzero <- which(x != 0)
+    x <- x[idNOzero]
     
     # Check for supported inputs types
     if(is.vector(x) && is.numeric(x)) {
@@ -87,7 +90,7 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
     
 
     n <- length(x_2)
-    data_det <- data.frame(index = 1:n, values = x_2, or_values = x)
+    data_det <- data.frame(index = idNOzero, values = x_2, or_values = x)
     # Maximum number of outliers that C-H-ESD can detect (e.g. 49% of data)
     max_outliers <- trunc(n*max_anoms)
     func_ma <- match.fun(median)
@@ -114,7 +117,7 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
         # protect against constant time series
         data_sigma <- func_sigma(data_det[[3L]])   
         # the standard deviation has to be calculated from the orginal 
-        # distribution because otherwise it would be affected to match 
+        # distribution because otherwise it would be affected too much 
         # by the cycle component
         if(data_sigma == 0) 
             break
@@ -144,7 +147,7 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
     
     if(num_anoms > 0) {
         R_idx <- R_idx[1L:num_anoms]
-        all_data <- data.frame(index = 1:n, anoms = x)
+        all_data <- data.frame(index = idNOzero, anoms = x)
         anoms_data <- subset(all_data, (all_data[[1]] %in% R_idx))
     } else {
         anoms_data <- NULL
