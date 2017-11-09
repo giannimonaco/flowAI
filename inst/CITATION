@@ -1,24 +1,33 @@
-citHeader("To cite the R package 'flowAI' in your publication please use:")
-
-citEntry(entry  = "article",
+# article citation
+bibentry( header = "To mention the R package 'flowAI' in your publication please cite the article:",
+bibtype  = "Article",
          title  = "flowAI: automatic and interactive anomaly discerning tools for flow cytometry data",
-         author = personList(
-                 person(first="Gianni", last="Monaco"),
-                 person(first="Hao", last="Chen"),
-                 person(first="Michael", last="Poidinger"),
-                 person(first="Jinmiao", last="Chen"),
-                 person(first="João Pedro", last="de Magalhães"),
-                 person(first="Anis", last="Larbi")
-			),
+         author = c( person("Gianni", "Monaco"),
+                     person("Hao", "Chen"),
+                     person("Michael", "Poidinger"),
+                     person("Jinmiao", "Chen"),
+                     person("Joao Pedro", "de Magalhaes"),
+                     person("Anis", "Larbi") ),
          journal = "Bioinformatics",
          year = "2016",
-         doi  = "10.1093/bioinformatics/btw191 ",
-         note = paste("R package version ", R.Version()$major, ".", R.Version()$minor, sep = ""),
-         textVersion = paste("Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly discerning tools for flow cytometry data. Bioinformatics.")
-	)
+	 volume = "32",
+	 number = "16",
+         url  = "10.1093/bioinformatics/btw191",
+         textVersion = "Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly discerning tools for flow cytometry data. Bioinformatics. 2016 Aug 15;32(16):2473-80." )
 
 
-citFooter("This free open-source software implements academic
-research by the authors and co-workers. If you use it,
-please support the project by citing the appropriate 
-journal articles.")
+# R package citation
+yearR <- sub("-.*", "", meta$Date)
+noteR <- sprintf("R package version %s", meta$Version)
+
+bibentry( header = "In the case you need to cite only the software, use:",
+bibtype = "Manual",
+         title = "flowAI: automatic and interactive quality control for flow cytometry data",
+         author = c( person("Gianni", "Monaco", role = c("aut", "cre")),
+                     person("Hao", "Chen",role = "aut") ),
+         year = yearR,
+         note = noteR,
+         url = "10.18129/B9.bioc.flowAI",
+	 textVersion = paste0("Monaco,G. et al. (", yearR, ") flowAI: automatic and interactive quality control for flow cytometry data. ", noteR), 
+	 footer = "However, this is free open-source software implementing academic research by the authors and co-workers. If you use it, please support the project by citing the journal article.")
+
