@@ -1,45 +1,45 @@
 #' Automatic quality control of flow cytometry data.
 #'
-#' For a set of FCS files, \emph{flow_auto_qc} performs a complete and automatic 
+#' For a set of FCS files, \emph{flow_auto_qc} performs a complete and automatic
 #' quality control. It consists in the detection and removal of
-#' anomalies by checking three properties of flow cytometry: 1) flow rate, 
+#' anomalies by checking three properties of flow cytometry: 1) flow rate,
 #' 2) signal acquisition, 3) dynamic range.
 #'
 #' @param fcsfiles It can be a character vector with the filenames of the FCS files,
 #' a flowSet or a flowFrame.
-#' @param remove_from Select from which of the three steps the anomalies have to be 
-#' excluded in the high quality FCS file. The default option \code{"all"} removes the 
-#' anomalies from all the three steps. Alternatively, you can use: 
-#' \code{"FR_FS", "FR_FM", "FS_FM", "FR", "FS", "FM"}, to remove the anomalies only 
+#' @param remove_from Select from which of the three steps the anomalies have to be
+#' excluded in the high quality FCS file. The default option \code{"all"} removes the
+#' anomalies from all the three steps. Alternatively, you can use:
+#' \code{"FR_FS", "FR_FM", "FS_FM", "FR", "FS", "FM"}, to remove the anomalies only
 #' on a subset of the steps where \emph{FR} stands for the flow rate, \emph{FS} stands
 #' for signal acquisition and \emph{FM} stands for dynamic range.
 #' @param output Set it to 1 to return a flowFrame or a flowSet with high quality events only.
-#' Set it to 2 to return a flowFrame or a flowSet with an additional 
-#' parameter where the low quality events have a value higher than 10,000. 
+#' Set it to 2 to return a flowFrame or a flowSet with an additional
+#' parameter where the low quality events have a value higher than 10,000.
 #' Set it to 3 to return  a list with the IDs of low quality cells. Set it to any other
 #' value if no R object has to be returned. Default is \code{1}.
 #' @param timeCh Character string corresponding to the name of the Time Channel
 #' in the set of FCS files. By default is \code{NULL} and the name is retrieved
 #' automatically.
 #' @param second_fractionFR The fraction of a second that is used to split
-#' the time channel in order to recreate the flow rate. Set it to 
-#' \code{"timestep"} if you wish to recreate the flow rate at the maximum 
-#' resolution allowed by the flow cytometry instrument. Usually, the timestep 
-#' corresponds to 0.01, however, to shorten the running time of the analysis the 
+#' the time channel in order to recreate the flow rate. Set it to
+#' \code{"timestep"} if you wish to recreate the flow rate at the maximum
+#' resolution allowed by the flow cytometry instrument. Usually, the timestep
+#' corresponds to 0.01, however, to shorten the running time of the analysis the
 #' fraction used by default is 0.1, corresponding to 1/10 of a second.
 #' @param alphaFR The level of statistical significance used to
 #' accept anomalies detected by the ESD method. The default value is \code{0.01}.
-#' @param decompFR Logical indicating whether the flow rate should be decomposed 
-#' in the trend and cyclical components. Default is \code{TRUE} and the ESD 
-#' outlier detection will be executed on the trend component penalized by the 
-#' magnitude of the cyclical component. If it is \code{FALSE} the ESD outlier 
+#' @param decompFR Logical indicating whether the flow rate should be decomposed
+#' in the trend and cyclical components. Default is \code{TRUE} and the ESD
+#' outlier detection will be executed on the trend component penalized by the
+#' magnitude of the cyclical component. If it is \code{FALSE} the ESD outlier
 #' detection will be executed on the original flow rate.
-#' @param ChRemoveFS Add a character vector with the names or name portions 
-#' of the channels that you want to exclude from the signal acquisition check. 
-#' The default option, \code{c("FSC", "SSC")}, excludes the scatter parameters. 
+#' @param ChRemoveFS Add a character vector with the names or name portions
+#' of the channels that you want to exclude from the signal acquisition check.
+#' The default option, \code{c("FSC", "SSC")}, excludes the scatter parameters.
 #' If you want to include all the parameters in the analysis use \code{NULL}.
 #' @param outlierFS logical indicating whether outliers have to be removed
-#' before the changepoint detection of the signal acquisition check. 
+#' before the changepoint detection of the signal acquisition check.
 #' The default is \code{FALSE}.
 #' @param pen_valueFS The value of the penalty for the changepoint detection
 #' algorithm. This can be a numeric value or text giving the formula to use;
@@ -50,49 +50,49 @@
 #' @param max_cptFS The maximum number of changepoints that can be detected
 #' for each channel. The default is \code{3}.
 #' @param ChFM A character vector that indicates which channels need to include
-#' for the dynamic range check. The default option is \code{NULL} and 
+#' for the dynamic range check. The default option is \code{NULL} and
 #' with it all the channels are selected for the analysis.
-#' @param sideFM Select whether the dynamic range check has to be executed on  
+#' @param sideFM Select whether the dynamic range check has to be executed on
 #' both limits, the upper limit or the lower limit. Use one of the options:
 #' \code{"both", "upper", "lower"}. The default is \code{"both"}.
-#' @param neg_valuesFM Scalar indicating the method to use for the removal of the 
-#' anomalies from the lower limit of the dynamic range. Use \code{1} to remove 
+#' @param neg_valuesFM Scalar indicating the method to use for the removal of the
+#' anomalies from the lower limit of the dynamic range. Use \code{1} to remove
 #' negative outliers or use \code{2} to truncate the negative values to the cut-off
-#' indicated in the FCS file. 
-#' @param html_report Suffix to be added to the FCS filename to name the HTML 
-#' report of the quality control. The default is \code{"_QC"}. If you do not 
+#' indicated in the FCS file.
+#' @param html_report Suffix to be added to the FCS filename to name the HTML
+#' report of the quality control. The default is \code{"_QC"}. If you do not
 #' want to generate a report use \code{FALSE}.
-#' @param mini_report Name for the TXT file containing the percentage of 
-#' anomalies detected in the set of FCS files 
-#' analyzed. The default is \code{"_QCmini"}. If you do not want to generate 
+#' @param mini_report Name for the TXT file containing the percentage of
+#' anomalies detected in the set of FCS files
+#' analyzed. The default is \code{"_QCmini"}. If you do not want to generate
 #' the mini report use \code{FALSE}.
-#' @param fcs_QC Suffix to be added for the filename of the new FCS 
-#' containing a new parameter where the low quality events only have a value 
-#' higher than 10,000. The default is \code{"_QC"}. 
+#' @param fcs_QC Suffix to be added for the filename of the new FCS
+#' containing a new parameter where the low quality events only have a value
+#' higher than 10,000. The default is \code{"_QC"}.
 #' If you do not want to generate the high quality FCS file use \code{FALSE}.
-#' @param fcs_highQ Suffix to be added for the filename of the new FCS 
-#' containing only the events that passed the quality control. The default 
+#' @param fcs_highQ Suffix to be added for the filename of the new FCS
+#' containing only the events that passed the quality control. The default
 #' is \code{FALSE} and hence the high quality FCS file is not generated.
-#' @param fcs_lowQ Suffix to be added for the filename of the new FCS 
-#' containing only the events that did not pass the quality control. The default 
+#' @param fcs_lowQ Suffix to be added for the filename of the new FCS
+#' containing only the events that did not pass the quality control. The default
 #' is \code{FALSE} and hence the low quality FCS file is not generated.
-#' @param folder_results Character string used to name the directory that 
-#' contains the results. The default is \code{"resultsQC"}. If you intend 
+#' @param folder_results Character string used to name the directory that
+#' contains the results. The default is \code{"resultsQC"}. If you intend
 #' to return the results in the working directory use \code{FALSE}.
 #' @return A complete quality control is performed on flow cytometry data in FCS
 #' format. By default the analysis returns:
-#' 
+#'
 #' 1. a flowFrame or flowSet object containing new FCS files with only high quality events
-#' 
+#'
 #' and a directory named \var{resultsQC} containing:
-#' 
+#'
 #' 1. a set of new FCS files with a new parameter to gate out the low quality events a value larger than 10,000 is assigned to them only,
-#' 
-#' 2. a set of HTML reports, one for each FCS file, that include graphs and table indicating where the anomalies were detected, 
-#' 
+#'
+#' 2. a set of HTML reports, one for each FCS file, that include graphs and table indicating where the anomalies were detected,
+#'
 #' 3. a single TXT file reporting the percentage of events removed in each FCS file.
-#' 
-#' @author Gianni Monaco, Chen Hao 
+#'
+#' @author Gianni Monaco, Chen Hao
 #' @examples
 #'
 #' ## a sample dataset as flowSet object
@@ -114,19 +114,22 @@
 #' @importFrom utils write.table
 #' @export
 flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
-     timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE, 
-     ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200, 
-     max_cptFS = 3, ChFM = NULL, sideFM = "both", neg_valuesFM = 1, 
-     html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE, 
+     timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
+     ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200,
+     max_cptFS = 3, ChFM = NULL, sideFM = "both", neg_valuesFM = 1,
+     html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE,
      fcs_lowQ = FALSE, folder_results = "resultsQC") {
-  
+
     ## load the data
   if( is.character(fcsfiles) ){
     set <- read.flowSet(files = fcsfiles)
+    names <- fcsfiles
   }else if( class(fcsfiles) == "flowSet"){
     set <- fcsfiles
+    names <- flowCore::sampleNames(fcsfiles)
   }else if( class(fcsfiles) == "flowFrame" ){
     set <- as(fcsfiles,"flowSet")
+    names <- fcsfiles@description$GUID
   }else{
    stop("As first argument, use a flowSet or a character vector with the path of the FCS files")
   }
@@ -156,15 +159,15 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
   }else if( second_fractionFR < timestep ){
       stop("The argument second_fractionFR must be greater or equal to timestep.", call. =FALSE)
   }
-  
+
   if(folder_results != FALSE){
       folder_results <- strip.sep(folder_results)
       dir.create(folder_results, showWarnings = FALSE)
       folder_results <- paste0(folder_results, .Platform$file.sep)
   } else { folder_results <- ""}
-  
+
   out <- list()
-  
+
   for (i in 1:length(set)) {
     filename_ext <- basename(description(set[[i]])$FILENAME)
     filename <- sub("^([^.]*).*", "\\1", filename_ext)
@@ -201,25 +204,25 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
             warning(paste0("The time channel in ", filename_ext, " contains a single value. It cannot be used to recreate the flow rate. \n"), call. =FALSE)
             TimeChCheck <- "single_value"
         }else{
-            TimeChCheck <- NULL 
+            TimeChCheck <- NULL
         }
     }else{
         TimeChCheck <- "NoTime"
     }
-    
+
     # get the size of the bins
-    FSbinSize <- min(max(1, ceiling(nrow(set[[1]])/100)), 500)   
+    FSbinSize <- min(max(1, ceiling(nrow(set[[1]])/100)), 500)
     # order events in the FCS file if a proper Time channel is present
     if (is.null(TimeChCheck)) {
       ordFCS <- ord_fcs_time(set[[i]], timeCh)
-    }else{ 
-      ordFCS <- set[[i]] 
+    }else{
+      ordFCS <- set[[i]]
     }
-    
+
     origin_cellIDs <- 1:nrow(ordFCS)
 
     ### Describe here the arguments for the functions of the flow Rate and Flow Signal
-    FR_bin_arg <- list( second_fraction = second_fractionFR, timeCh = timeCh, 
+    FR_bin_arg <- list( second_fraction = second_fractionFR, timeCh = timeCh,
                   timestep = timestep)
     FR_QC_arg <- list( alpha = alphaFR, use_decomp = decompFR)
     FS_bin_arg <- list( binSize = FSbinSize, timeCh = timeCh, timestep = timestep, TimeChCheck = TimeChCheck)
@@ -270,12 +273,12 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       keyval <- keyword(ordFCS)
       if (fcs_highQ != FALSE || output == 1) {
           goodfcs <- flowFrame(exprs = sub_exprs[goodCellIDs, ], parameters = params, description = keyval)
-          if (fcs_highQ != FALSE) {suppressWarnings(write.FCS(goodfcs, good.fcs.file)) }
+         if (fcs_highQ != FALSE) {suppressWarnings(write.FCS(goodfcs, good.fcs.file)) }
       }
       if (fcs_QC != FALSE || output == 2 ){
           QCvector <- FlowSignalData$cellBinID[,"binID"]
           if(length(QCvector) > 9000) QCvector <- runif(length(QCvector), min=1, max=9000)
-          QCvector[badCellIDs] <- runif(length(badCellIDs), min=10000, max=20000) 
+          QCvector[badCellIDs] <- runif(length(badCellIDs), min=10000, max=20000)
           newFCS <- addQC(QCvector, remove_from, sub_exprs, params, keyval)
           if (fcs_QC != FALSE){ suppressWarnings(write.FCS(newFCS, QC.fcs.file)) }
       }
@@ -284,15 +287,15 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       suppressWarnings(write.FCS(badfcs, bad.fcs.file))
     }
     if (mini_report != FALSE) {
-        write.table(t(c(filename, as.integer(dim(set[[i]])[1]), 
-        totalBadPerc * 100, analysis, FlowRateQC$res_fr_QC$badPerc * 100, 
-        FlowSignalQC$Perc_bad_cells$badPerc_tot * 100,  
-        FlowMarginQC$badPerc * 100)), minireport, sep="\t", 
+        write.table(t(c(filename, as.integer(dim(set[[i]])[1]),
+        totalBadPerc * 100, analysis, FlowRateQC$res_fr_QC$badPerc * 100,
+        FlowSignalQC$Perc_bad_cells$badPerc_tot * 100,
+        FlowMarginQC$badPerc * 100)), minireport, sep="\t",
         append=TRUE, row.names = FALSE, quote = FALSE, col.names = FALSE)
      }
      if (html_report != FALSE) {
        h_FS_graph <- round(0.4 * (ncol(ordFCS)),1)
-       if (!is.null(ChRemoveFS)){ 
+       if (!is.null(ChRemoveFS)){
            ChannelRemovedFS <- as.character(grep(paste(ChRemoveFS, collapse="|"),
                ordFCS@parameters$name, value = TRUE))
        }
@@ -310,9 +313,12 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
           names(out)[i] <- filename
       }
   }
-  if( output == 1 || output == 2){ 
+  if( output == 1 || output == 2){
       if(length(out) == 1){ return( out[[1]] )
-      }else{  return(as(out, "flowSet"))  }
+      }else{
+        OutSet <- as(out, "flowSet")
+        flowCore::sampleNames(OutSet) <- names
+        return( OutSet ) }
   }
-  if( output == 3 ){ return(out) } 
+  if( output == 3 ){ return(out) }
 }
