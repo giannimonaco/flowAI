@@ -34,11 +34,11 @@
 #' outlier detection will be executed on the trend component penalized by the
 #' magnitude of the cyclical component. If it is \code{FALSE} the ESD outlier
 #' detection will be executed on the original flow rate.
-#' @param ChRemoveFS Add a character vector with the names or name portions
+#' @param ChExcludeFS Character vector with the names or name patterns
 #' of the channels that you want to exclude from the signal acquisition check.
 #' The default option, \code{c("FSC", "SSC")}, excludes the scatter parameters.
 #' If you want to include all the parameters in the analysis use \code{NULL}.
-#' @param outlierFS logical indicating whether outliers have to be removed
+#' @param outlier_binsFS logical indicating whether outlier bins (not events) have to be removed
 #' before the changepoint detection of the signal acquisition check.
 #' The default is \code{FALSE}.
 #' @param pen_valueFS The value of the penalty for the changepoint detection
@@ -49,9 +49,10 @@
 #' The default is \code{200}.
 #' @param max_cptFS The maximum number of changepoints that can be detected
 #' for each channel. The default is \code{3}.
-#' @param ChFM A character vector that indicates which channels need to include
-#' for the dynamic range check. The default option is \code{NULL} and
-#' with it all the channels are selected for the analysis.
+#' @param ChExcludeFM Character vector with the names or name patterns
+#' of the channels that you want to exclude from the signal acquisition check.
+#' The default option, \code{c("FSC", "SSC")}, excludes the scatter parameters.
+#' If you want to include all the parameters in the analysis use \code{NULL}.
 #' @param sideFM Select whether the dynamic range check has to be executed on
 #' both limits, the upper limit or the lower limit. Use one of the options:
 #' \code{"both", "upper", "lower"}. The default is \code{"both"}.
@@ -106,6 +107,7 @@
 #' @import plyr
 #' @import knitr
 #' @import reshape2
+#' @import rmarkdown
 #' @importFrom changepoint cpt.meanvar
 #' @importFrom scales pretty_breaks
 #' @importFrom graphics hist legend lines
@@ -115,8 +117,8 @@
 #' @export
 flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
      timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
-     ChRemoveFS = c("FSC", "SSC"), outlierFS = FALSE, pen_valueFS = 200,
-     max_cptFS = 3, ChFM = NULL, sideFM = "both", neg_valuesFM = 1,
+     ChExcludeFS = c("FSC", "SSC"), outlier_binsFS = FALSE, pen_valueFS = 200,
+     max_cptFS = 3, ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
      html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE,
      fcs_lowQ = FALSE, folder_results = "resultsQC") {
 
@@ -173,7 +175,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
     filename <- sub("^([^.]*).*", "\\1", filename_ext)
 
     if (html_report != FALSE) {
-        reportfile <- paste0(folder_results,filename, html_report, ".html")
+        reportfile <- paste0(folder_results, filename, html_report, ".html")
     }
     if (mini_report != FALSE) {
         minireport <-  paste0(folder_results, mini_report, ".txt")
@@ -226,8 +228,8 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
                   timestep = timestep)
     FR_QC_arg <- list( alpha = alphaFR, use_decomp = decompFR)
     FS_bin_arg <- list( binSize = FSbinSize, timeCh = timeCh, timestep = timestep, TimeChCheck = TimeChCheck)
-    FS_QC_arg <- list( ChannelRemove = ChRemoveFS, pen_valueFS, max_cptFS, outlierFS )
-    FM_QC_arg <- list( margin_channels = ChFM , side= sideFM, neg_values = neg_valuesFM)
+    FS_QC_arg <- list( ChannelExclude = ChExcludeFS, pen_valueFS, max_cptFS, outlier_binsFS )
+    FM_QC_arg <- list( ChannelExclude = ChExcludeFM, side= sideFM, neg_values = neg_valuesFM)
 
     #### The actual analysis is performed here
       if (is.null(TimeChCheck)) {
@@ -295,14 +297,21 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
      }
      if (html_report != FALSE) {
        h_FS_graph <- round(0.4 * (ncol(ordFCS)),1)
-       if (!is.null(ChRemoveFS)){
-           ChannelRemovedFS <- as.character(grep(paste(ChRemoveFS, collapse="|"),
+       if (!is.null(ChExcludeFS)){
+           ChannelExcludedFS <- as.character(grep(paste(ChExcludeFS, collapse="|"),
                ordFCS@parameters$name, value = TRUE))
        }
+       if (!is.null(ChExcludeFM)){
+         ChannelExcludedFM <- as.character(grep(paste(ChExcludeFM, collapse="|"),
+                                                ordFCS@parameters$name, value = TRUE))
+       }
        template_path <- system.file("rmd","autoQC_report.Rmd", package='flowAI')
-       knit2html(template_path, output = reportfile, force_v1 = TRUE, quiet = TRUE)
-    #   file.remove("autoQC_report.md")
-    #   unlink("figure", recursive = TRUE)
+       new_template <- paste0(folder_results, filename, "_template.Rmd")
+       file.copy(template_path, new_template)
+
+       rmarkdown::render(new_template, html_document(), output_file= reportfile, quiet = TRUE )
+
+       file.remove(new_template)
      }
       if(output == 1){
           out <- c(out, goodfcs)

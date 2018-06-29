@@ -1,5 +1,5 @@
 ---
-title: "autoQC report"
+title: "flowAI report"
 author: "SIgN_GM"
 output: html_document
 ---
@@ -7,7 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 opts_chunk$set(fig.align='center', out.width='750px', dpi=200)  # , dev = c('png', 'pdf')
-opts_knit$set(progress=FALSE)
+opts_knit$set( progress=FALSE ) #, base.dir = paste0(filename,.Platform$file.sep))
+#fig.path = paste0(filename, '/figures/'),
 ```
 
 ## FCS file information
@@ -65,7 +66,7 @@ cat("It was not possible to analyze the flow rate since the time channel contain
 > **`r FlowSignalQC$Perc_bad_cells$badPerc_tot * 100`** % anomalies detected in the signal aquisition check. 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
-  if (outlierFS) { 
+  if (outlier_binsFS) { 
         cat(paste0("Outliers were removed before the changepoint analysis.", FlowSignalQC$Perc_bad_cells$badPerc_out * 100, "% of anomalies were detected as outliers and ", FlowSignalQC$Perc_bad_cells$badPerc_cp *100, " of anomalies were detected in the changepoint analysis. \n"))
    }
 ```
@@ -79,7 +80,7 @@ The more stable region selected consistent for all channels is highlighted in ye
 
 The FCS file was divided in `r FlowSignalData$bins` bins, hence each bin contains `r  ceiling(nrow(set[[i]])/FlowSignalData$bins)` event(s). The stable region is located between the bins `r FlowSignalQC$segm[1]` and `r FlowSignalQC$segm[2]`.
 
-##### More info on the changepoints detected:
+##### More info on the changepoints detected
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
 if(!is.null(FlowSignalQC$tab_cpt)){
@@ -96,8 +97,8 @@ if(!is.null(FlowSignalQC$tab_cpt)){
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
-if(!is.null(ChRemoveFS)){
-     cat(paste0("Channels excluded from the analysis: ", paste(ChannelRemovedFS, collapse = ", "), ". \n \n"))
+if(!is.null(ChExcludeFS)){
+     cat(paste0("Channels excluded from the analysis: ", paste(ChannelExcludedFS, collapse = ", "), ". \n \n"))
 }
 
 if(!is.null(FlowSignalQC$ch_no_cpt) && length(FlowSignalQC$ch_no_cpt) != 0 ){
@@ -123,10 +124,16 @@ flow_margin_plot(FlowMarginQC, FSbinSize)
 ```
 
 
-##### More info on the anomalies detected in the dynamic range check:
+##### More info on the anomalies detected in the dynamic range check
 
-for each channel, The table shows the number of events that did not pass the dynamic range check:
+For each channel analyzed, the table shows the number of events that did not pass the dynamic range check:
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 FlowMarginQC$margin_events
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+if(!is.null(ChExcludeFM)){
+     cat(paste0("Channels excluded from the analysis: ", paste(ChannelExcludedFM, collapse = ", "), ". \n \n"))
+}
 ```

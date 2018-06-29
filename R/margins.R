@@ -1,17 +1,18 @@
 # The events on the upper margin and the outlier in the negative
 # range of values are detected and removed.
 #
-flow_margin_check <- function(x,  margin_channels = NULL,
+flow_margin_check <- function(x,  ChannelExclude = NULL,
                       side = "both", neg_values = 1) {
 
-  if (is.null(margin_channels)) {
-    teCh <- grep("Time|time|TIME|Event|event|EVENT", colnames(x), value = TRUE)
-    parms <- setdiff(colnames(x), teCh)
-  } else {
-    if (!all(margin_channels %in% colnames(x)))
-      stop("Invalid channel(s)")
-    parms <- margin_channels
+  teCh <- grep("Time|time|TIME|Event|event|EVENT", colnames(x), value = TRUE)
+  parms <- setdiff(colnames(x), teCh)
+
+  if (!is.null(ChannelExclude)) {
+    ChannelExclude_COMP <- grep(paste(ChannelExclude, collapse="|"),
+                               colnames(x), value = TRUE)
+    parms <- setdiff(parms, ChannelExclude_COMP)
   }
+
   scatter_parms <- grep("FSC|SSC", parms, value = TRUE)
 
   xx <- c(1:nrow(x))
@@ -62,7 +63,7 @@ flow_margin_check <- function(x,  margin_channels = NULL,
       lowID <- do.call(c, lapply(parms, function(ch) {
           xx[yy[, ch] <= range[1, ch]]
       }))
-  } 
+  }
   if (side == "upper" || side == "both") {
     upID <- do.call(c, lapply(parms, function(ch) {
       xx[yy[, ch] >= range[2, ch]]

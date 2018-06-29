@@ -46,16 +46,16 @@ flow_signal_bin <- function(x, channels = NULL, binSize = 500,
 #########################################################################
 # Detection of shifts in the median intensity signal detected
 # by the laser of the flow cytometry over time
-flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
+flow_signal_check <- function(x, FlowSignalData, ChannelExclude = NULL,
   pen_valueFS = pen_valueFS, maxSegmentFS = maxSegmentFS, outlier_remove = FALSE) {
 
   fs_cellBinID <- FlowSignalData$cellBinID
   fs_res <- FlowSignalData$exprsBin
-  ### log transformation. 
+  ### log transformation.
   # fs_res[which(fs_res <= 1 & fs_res >= -1)] <- 0
   # fs_res[which(fs_res > 1)] <- log(fs_res[which(fs_res > 1)])
   # fs_res[which(fs_res < -1)] <- -log(abs(fs_res[which(fs_res < -1)]))
-  
+
   teCh <- grep("Time|time|TIME|Event|event|EVENT", colnames(fs_res), value = TRUE)
   parms <- setdiff(colnames(fs_res), teCh)
 
@@ -66,12 +66,12 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   FS_out <- which(sum_sign >outup_tr)
 
   #### Remove channel from the changepoint analysis
-  if (!is.null(ChannelRemove)) {
-    ChannelRemove_COMP <- grep(paste(ChannelRemove, collapse="|"),
+  if (!is.null(ChannelExclude)) {
+    ChannelExclude_COMP <- grep(paste(ChannelExclude, collapse="|"),
                       colnames(fs_res), value = TRUE)
-  #  cat(paste0("The channels whose signal acquisition will not be checked are: ", 
-   #   paste(ChannelRemove_COMP, collapse = ", "), ". \n"))
-    parms <- setdiff(parms, ChannelRemove_COMP)
+  #  cat(paste0("The channels whose signal acquisition will not be checked are: ",
+   #   paste(ChannelExclude_COMP, collapse = ", "), ". \n"))
+    parms <- setdiff(parms, ChannelExclude_COMP)
   }
 
   if(outlier_remove){
@@ -145,7 +145,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelRemove = NULL,
   badPerc_cp <- round(1 - ((max_seg[2] - max_seg[1])/(length(fs_res[, 1]) - 1)),4)
 
   cat(paste0(100 * badPerc_cp, "% of anomalous cells detected in signal acquisition check. \n"))
- 
+
   # retrieve ID of good cells
   if(outlier_remove){
     fs_cellBinID <- fs_cellBinID[which(!fs_cellBinID[, 2] %in% FS_out),]
