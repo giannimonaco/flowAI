@@ -1,7 +1,7 @@
 Package: flowAI
 Type: Package
 Title: Automatic and interactive quality control for flow cytometry data
-Version: 1.13.0
+Version: 1.13.1
 Date: 2018-06-29
 Author: Gianni Monaco, Hao Chen
 Description: The package is able to perform an automatic or interactive quality
@@ -11,7 +11,7 @@ Description: The package is able to perform an automatic or interactive quality
 Depends: R (>= 3.4)
 License: GPL (>= 2)
 LazyData: TRUE
-biocViews: FlowCytometry, QualityControl, BiomedicalInformatics
+biocViews: FlowCytometry, QualityControl, BiomedicalInformatics, ImmunoOncology
 Imports: ggplot2, flowCore, plyr, changepoint, knitr, reshape2,
         RColorBrewer, scales, methods, graphics, stats, utils, rmarkdown
 Suggests: testthat, shiny
