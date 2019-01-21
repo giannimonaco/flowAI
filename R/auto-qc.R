@@ -175,7 +175,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
     filename <- sub("^([^.]*).*", "\\1", filename_ext)
 
     if (html_report != FALSE) {
-        reportfile <- paste0(folder_results, filename, html_report, ".html")
+        reportfile <- paste0(filename, html_report, ".html")
     }
     if (mini_report != FALSE) {
         minireport <-  paste0(folder_results, mini_report, ".txt")
@@ -308,8 +308,13 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
        template_path <- system.file("rmd","autoQC_report.Rmd", package='flowAI')
        new_template <- paste0(folder_results, filename, "_template.Rmd")
        file.copy(template_path, new_template)
+       # apparently the render function does not work well if there is not a space character in the name of the template
+       if(folder_results != FALSE){  
+          rmarkdown::render(new_template, html_document(), output_dir = folder_results, output_file = reportfile, quiet = TRUE )
+       }else{
+          rmarkdown::render(new_template, html_document(), output_file = reportfile, quiet = TRUE )
+       }
 
-       rmarkdown::render(new_template, html_document(), output_file= reportfile, quiet = TRUE )
 
        file.remove(new_template)
      }

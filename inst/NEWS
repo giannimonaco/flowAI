@@ -12,3 +12,6 @@
 
 1.10.1: 
 - add parallel processing compatibility
+
+1.12.2:
+- fix bug with render function
