@@ -16,7 +16,7 @@ flow_margin_check <- function(x,  ChannelExclude = NULL,
   scatter_parms <- grep("FSC|SSC", parms, value = TRUE)
 
   xx <- c(1:nrow(x))
-  yy <- x@exprs[, parms]
+  yy <- x@exprs[, parms, drop=F]
   range <- range(x)
   lenx <- length(xx)
 
