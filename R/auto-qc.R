@@ -117,7 +117,7 @@
 #' @export
 flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
      timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
-     ChExcludeFS = c("FSC", "SSC"), outlier_binsFS = FALSE, pen_valueFS = 200,
+     ChExcludeFS = c("FSC", "SSC"), outlier_binsFS = FALSE, pen_valueFS = 500,
      max_cptFS = 3, ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
      html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE,
      fcs_lowQ = FALSE, folder_results = "resultsQC") {
