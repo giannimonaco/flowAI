@@ -46,7 +46,7 @@
 #' for instance, you can use the character string \code{"1.5*log(n)"},
 #' where n indicates the number of cells in the FCS file. The higher the
 #' penalty value the less strict is the detection of the anomalies.
-#' The default is \code{200}.
+#' The default is \code{500}.
 #' @param max_cptFS The maximum number of changepoints that can be detected
 #' for each channel. The default is \code{3}.
 #' @param ChExcludeFM Character vector with the names or name patterns
