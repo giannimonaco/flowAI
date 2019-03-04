@@ -4,13 +4,13 @@
 \alias{flow_auto_qc}
 \title{Automatic quality control of flow cytometry data.}
 \usage{
-flow_auto_qc(fcsfiles, remove_from = "all", output = 1, timeCh = NULL,
-  second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
-  ChExcludeFS = c("FSC", "SSC"), outlier_binsFS = FALSE,
-  pen_valueFS = 200, max_cptFS = 3, ChExcludeFM = c("FSC", "SSC"),
-  sideFM = "both", neg_valuesFM = 1, html_report = "_QC",
-  mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE,
-  fcs_lowQ = FALSE, folder_results = "resultsQC")
+flow_auto_qc(fcsfiles, remove_from = "all", output = 1,
+  timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01,
+  decompFR = TRUE, ChExcludeFS = c("FSC", "SSC"),
+  outlier_binsFS = FALSE, pen_valueFS = 500, max_cptFS = 3,
+  ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
+  html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC",
+  fcs_highQ = FALSE, fcs_lowQ = FALSE, folder_results = "resultsQC")
 }
 \arguments{
 \item{fcsfiles}{It can be a character vector with the filenames of the FCS files,
@@ -63,7 +63,7 @@ algorithm. This can be a numeric value or text giving the formula to use;
 for instance, you can use the character string \code{"1.5*log(n)"},
 where n indicates the number of cells in the FCS file. The higher the
 penalty value the less strict is the detection of the anomalies.
-The default is \code{200}.}
+The default is \code{500}.}
 
 \item{max_cptFS}{The maximum number of changepoints that can be detected
 for each channel. The default is \code{3}.}

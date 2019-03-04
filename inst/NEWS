@@ -15,3 +15,6 @@
 
 1.12.2:
 - fix bug with render function
+
+1.12.5:
+- increased pen_valueFS default value
