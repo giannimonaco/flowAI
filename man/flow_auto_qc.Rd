@@ -94,7 +94,7 @@ the mini report use \code{FALSE}.}
 \item{fcs_QC}{Suffix to be added for the filename of the new FCS
 containing a new parameter where the low quality events only have a value
 higher than 10,000. The default is \code{"_QC"}.
-If you do not want to generate the high quality FCS file use \code{FALSE}.}
+If you do not want to generate the quality controlled FCS file use \code{FALSE}.}
 
 \item{fcs_highQ}{Suffix to be added for the filename of the new FCS
 containing only the events that passed the quality control. The default
