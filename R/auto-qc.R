@@ -24,7 +24,7 @@
 #' @param second_fractionFR The fraction of a second that is used to split
 #' the time channel in order to recreate the flow rate. Set it to
 #' \code{"timestep"} if you wish to recreate the flow rate at the maximum
-#' resolution allowed by the flow cytometry instrument. Usually, the timestep
+#' resolution allowed by the flow cytometry instrument. Usually, for FCS files the timestep
 #' corresponds to 0.01, however, to shorten the running time of the analysis the
 #' fraction used by default is 0.1, corresponding to 1/10 of a second.
 #' @param alphaFR The level of statistical significance used to
@@ -124,7 +124,12 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
 
     ## load the data
   if( is.character(fcsfiles) ){
-    set <- read.flowSet(files = fcsfiles)
+    FileType <- toupper(strsplit(basename(fcsfiles[1]), split="\\.")[[1]][-1])
+    if(FileType == "LMD"){
+      set <- read.flowSet(files = fcsfiles, dataset = 2)
+    }else{
+      set <- read.flowSet(files = fcsfiles) 
+    }
     names <- fcsfiles
   }else if( class(fcsfiles) == "flowSet"){
     set <- fcsfiles
@@ -150,11 +155,15 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
   # could be more than one slots for the Timestep parameter. the first in
   # numerical order should be the original value.
   word <- which(grepl("TIMESTEP", names(set[[1]]@description),
-                ignore.case = TRUE))
+                      ignore.case = TRUE))
   timestep <- as.numeric(set[[1]]@description[[word[1]]])
   if( !length(timestep) ){
-    warning("The TIMESTEP keyword was not found and hence it was set to 0.01. Graphs labels indicating time might not be correct", call. =FALSE)
-    timestep <- 0.01
+    if(FileType == "LMD"){
+      timestep <- 0.0009765625 # this timestep corresponds to 1/1024
+    }else{
+      warning("The TIMESTEP keyword was not found and hence it was set to 0.01. Graphs labels indicating time might not be correct", call. =FALSE)
+      timestep <- 0.01
+    }
   }
   if( second_fractionFR == "timestep" ){
       second_fractionFR <- timestep
