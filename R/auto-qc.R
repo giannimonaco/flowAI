@@ -176,7 +176,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       dir.create(folder_results, showWarnings = FALSE)
       folder_results <- paste0(folder_results, .Platform$file.sep)
   } else { folder_results <- ""}
-  
+
   out <- list()
 
   for (i in 1:length(set)) {
