@@ -177,6 +177,8 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       folder_results <- paste0(folder_results, .Platform$file.sep)
   } else { folder_results <- ""}
 
+  pd <- pData(set)
+  
   out <- list()
 
   for (i in 1:length(set)) {
@@ -341,6 +343,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       }else{
         OutSet <- as(out, "flowSet")
         flowCore::sampleNames(OutSet) <- names
+        pData(OutSet) <- pd
         return( OutSet ) }
   }
   if( output == 3 ){ return(out) }
