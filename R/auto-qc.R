@@ -131,12 +131,12 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       set <- read.flowSet(files = fcsfiles) 
     }
     names <- fcsfiles
-  }else if( class(fcsfiles) == "flowSet"){
+  }else if(is(fcsfiles, "flowSet")){
     set <- fcsfiles
     names <- flowCore::sampleNames(fcsfiles)
-  }else if( class(fcsfiles) == "flowFrame" ){
+  }else if(is(fcsfiles,"flowFrame")){
     set <- as(fcsfiles,"flowSet")
-    names <- fcsfiles@description$GUID
+    names <- identifier(fcsfiles)
   }else{
    stop("As first argument, use a flowSet or a character vector with the path of the FCS files")
   }
@@ -180,7 +180,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
   out <- list()
 
   for (i in 1:length(set)) {
-    filename_ext <- basename(description(set[[i]])$FILENAME)
+    filename_ext <- basename(keyword(set[[i]], "$FIL")[[1]])
     filename <- sub("^([^.]*).*", "\\1", filename_ext)
 
     if (html_report != FALSE) {
