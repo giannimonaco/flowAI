@@ -341,6 +341,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       }else{
         OutSet <- as(out, "flowSet")
         flowCore::sampleNames(OutSet) <- names
+        pData(OutSet) <- pData(set)
         return( OutSet ) }
   }
   if( output == 3 ){ return(out) }
