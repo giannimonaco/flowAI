@@ -158,7 +158,7 @@ flow_signal_plot <- function(flowSignalData, lowerBinThres, upperBinThres) {
     exprsBin <- flowSignalData$exprsBin
 
     binID <- 1:nrow(exprsBin)
-    teCh <- grep("Time|time|Event|event", colnames(exprsBin), value = T)
+    teCh <- grep("Time|time|Event|event", colnames(exprsBin), value = TRUE)
     parms <- setdiff(colnames(exprsBin), teCh)
     dataORIG <- exprsBin[, parms]     # first channel is time
     data <- as.data.frame(dataORIG)
@@ -194,14 +194,14 @@ flow_signal_check <- function(flowSignalData, lowerBinThres, upperBinThres) {
 flow_margin_check <- function(x,  margin_channels = NULL, side = "both") {
 
     if (is.null(margin_channels)) {
-        teCh <- grep("Time|time|Event|event", colnames(x), value = T)
+        teCh <- grep("Time|time|Event|event", colnames(x), value = TRUE)
         parms <- setdiff(colnames(x), teCh)
     } else {
         if (!all(margin_channels %in% colnames(x)))
             stop("Invalid channel(s)")
         parms <- margin_channels
     }
-    scatter_parms <- grep("FSC|SSC", parms, value = T)
+    scatter_parms <- grep("FSC|SSC", parms, value = TRUE)
 
     xx <- c(1:nrow(x))
     yy <- x@exprs[, parms]
@@ -229,8 +229,7 @@ flow_margin_check <- function(x,  margin_channels = NULL, side = "both") {
         neg_bad_len <- sapply(parms, function(x) length(xx[yy[, x] <= out_neg_range[x]]))
     }
     if (side == "upper" || side == "both") {
-        pos_bad_len <- sapply(parms, function(x) length(xx[yy[, x] >= range[2,
-                                                                            x]]))
+        pos_bad_len <- sapply(parms, function(x) length(xx[yy[, x] >= range[2, x]]))
     }
 
     # badcellIDs

@@ -20,3 +20,4 @@ if (interactive()) flowAI::flow_iQC()
 \author{
 Chen Hao, Gianni Monaco
 }
+\keyword{iplot}

@@ -4,13 +4,28 @@
 \alias{flow_auto_qc}
 \title{Automatic quality control of flow cytometry data.}
 \usage{
-flow_auto_qc(fcsfiles, remove_from = "all", output = 1,
-  timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01,
-  decompFR = TRUE, ChExcludeFS = c("FSC", "SSC"),
-  outlier_binsFS = FALSE, pen_valueFS = 500, max_cptFS = 3,
-  ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
-  html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC",
-  fcs_highQ = FALSE, fcs_lowQ = FALSE, folder_results = "resultsQC")
+flow_auto_qc(
+  fcsfiles,
+  remove_from = "all",
+  output = 1,
+  timeCh = NULL,
+  second_fractionFR = 0.1,
+  alphaFR = 0.01,
+  decompFR = TRUE,
+  ChExcludeFS = c("FSC", "SSC"),
+  outlier_binsFS = FALSE,
+  pen_valueFS = 500,
+  max_cptFS = 3,
+  ChExcludeFM = c("FSC", "SSC"),
+  sideFM = "both",
+  neg_valuesFM = 1,
+  html_report = "_QC",
+  mini_report = "QCmini",
+  fcs_QC = "_QC",
+  fcs_highQ = FALSE,
+  fcs_lowQ = FALSE,
+  folder_results = "resultsQC"
+)
 }
 \arguments{
 \item{fcsfiles}{It can be a character vector with the filenames of the FCS files,
@@ -36,7 +51,7 @@ automatically.}
 \item{second_fractionFR}{The fraction of a second that is used to split
 the time channel in order to recreate the flow rate. Set it to
 \code{"timestep"} if you wish to recreate the flow rate at the maximum
-resolution allowed by the flow cytometry instrument. Usually, the timestep
+resolution allowed by the flow cytometry instrument. Usually, for FCS files the timestep
 corresponds to 0.01, however, to shorten the running time of the analysis the
 fraction used by default is 0.1, corresponding to 1/10 of a second.}
 
