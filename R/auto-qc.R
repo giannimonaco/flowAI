@@ -125,7 +125,11 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
     ## load the data
   if( is.character(fcsfiles) ){
     FileType <- toupper(strsplit(basename(fcsfiles[1]), split="\\.")[[1]][-1])
-    if(FileType == "LMD"){
+    if(length(FileType) == 0){
+      warning("It was not possible to retrieve the file extension. The data will be processed as FCS.", call. =FALSE)
+      FileType <- "FCS"
+    }
+    else if(FileType == "LMD"){
       set <- read.flowSet(files = fcsfiles, dataset = 2)
     }else{
       set <- read.flowSet(files = fcsfiles) 
