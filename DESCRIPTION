@@ -17,5 +17,5 @@ Imports: ggplot2, flowCore, plyr, changepoint, knitr, reshape2,
 Suggests: testthat, shiny
 Maintainer: Gianni Monaco <mongianni1@gmail.com>
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 NeedsCompilation: no

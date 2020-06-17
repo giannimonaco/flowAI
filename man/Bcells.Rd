@@ -4,7 +4,9 @@
 \name{Bcells}
 \alias{Bcells}
 \title{flowSet of B cells.}
-\format{A flowSet containing 3 flowFrames}
+\format{
+A flowSet containing 3 flowFrames
+}
 \usage{
 data(Bcells)
 }
