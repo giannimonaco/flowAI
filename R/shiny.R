@@ -8,6 +8,7 @@
 #' flow cytometry: 1) flow rate, 2) signal acquisition, 3) dynamic range.
 #' 
 #' @author Chen Hao, Gianni Monaco
+#' @keywords iplot
 #' @import RColorBrewer
 #' @export
 #' @examples if (interactive()) flowAI::flow_iQC()

@@ -18,3 +18,6 @@
 
 1.12.5:
 - increased pen_valueFS default value
+
+1.18.0:
+- add compatibility with LMD data files
