@@ -158,9 +158,9 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
   # in some cases, especially if the FCS file has been modified, there
   # could be more than one slots for the Timestep parameter. the first in
   # numerical order should be the original value.
-  word <- which(grepl("TIMESTEP", names(set[[1]]@description),
+  word <- which(grepl("TIMESTEP", names(keyword(set[[1]])),
                       ignore.case = TRUE))
-  timestep <- as.numeric(set[[1]]@description[[word[1]]])
+  timestep <- as.numeric(keyword(set[[1]])[[word[1]]])
   if( !length(timestep) ){
     if(FileType == "LMD"){
       timestep <- 0.0009765625 # this timestep corresponds to 1/1024
