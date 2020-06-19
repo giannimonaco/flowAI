@@ -59,14 +59,14 @@ addQC <- function(QCvector, remove_from, sub_exprs, params, keyval){
     rownames(o)[length(o[,1])] <- paste("$P", NN, sep = "")
     
     outFCS <- new("flowFrame", exprs=sub_exprs, parameters=new("AnnotatedDataFrame",o), description=keyval)
-    description(outFCS)[pnr] <- max(20000, description(outFCS)$`$P1R`)
-    description(outFCS)[pnb] <- description(outFCS)$`$P1B`
-    description(outFCS)[pne] <- "0,0"
-    description(outFCS)[pnn] <- paste0("remove_from_", remove_from)
-    description(outFCS)[pns] <- "QC"
-    description(outFCS)$`$PAR` <- NN
-    description(outFCS)[flowCorePnRmax] <- 20000
-    description(outFCS)[flowCorePnRmin] <- 0
+    keyword(outFCS)[pnr] <- max(20000, keyword(outFCS)$`$P1R`)
+    keyword(outFCS)[pnb] <- keyword(outFCS)$`$P1B`
+    keyword(outFCS)[pne] <- "0,0"
+    keyword(outFCS)[pnn] <- paste0("remove_from_", remove_from)
+    keyword(outFCS)[pns] <- "QC"
+    keyword(outFCS)$`$PAR` <- NN
+    keyword(outFCS)[flowCorePnRmax] <- 20000
+    keyword(outFCS)[flowCorePnRmin] <- 0
     outFCS
 }  
 
