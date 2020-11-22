@@ -137,9 +137,9 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       FileType <- "FCS"
     }
     else if(FileType == "LMD"){
-      set <- read.flowSet(files = fcsfiles, dataset = 2)
+      set <- read.flowSet(files = fcsfiles, dataset = 2, truncate_max_range = FALSE)
     }else{
-      set <- read.flowSet(files = fcsfiles) 
+      set <- read.flowSet(files = fcsfiles, truncate_max_range = FALSE) 
     }
     names <- fcsfiles
   }else if(is(fcsfiles, "flowSet")){

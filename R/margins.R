@@ -97,6 +97,17 @@ flow_margin_check <- function(x,  ChannelExclude = NULL,
 
   cat(paste0(100 * badPerc, "% of anomalous cells detected in the dynamic range check. \n"))
 
+  ### Check out of range values
+  allOut <- sapply(colnames(x), function(nam) sum(exprs(x)[, nam] > range(x)[2,nam]))
+  if(sum(allOut>0) >= 1){
+    selOut <- allOut[allOut>0]
+    selOutTab <- data.frame(`Channel` = names(selOut), 
+                            `Max upper value` = as.numeric(range(x[,names(selOut)])[2,]), 
+                            `n. of values out of range` = selOut, check.names = F )
+  }else{
+    selOutTab <- NULL    
+  }
+  
   params <- parameters(x)
   keyval <- keyword(x)
   sub_exprs <- exprs(x)
@@ -106,9 +117,10 @@ flow_margin_check <- function(x,  ChannelExclude = NULL,
 
   return(list(FMnewFCS = newx, goodCellIDs = goodCellIDs,
               bad_lowerIDs = bad_lowerIDs, bad_upperIDs = bad_upperIDs,
-              margin_events = summary_bad_cells, badPerc = badPerc,
-              events = lenx))
+              margin_events = summary_bad_cells, OutOfRange = selOutTab,
+              badPerc = badPerc, events = lenx))
 }
+
 
 
 ###  graph showing where the anomalies mostly happened

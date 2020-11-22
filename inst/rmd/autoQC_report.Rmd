@@ -137,3 +137,17 @@ if(!is.null(ChExcludeFM)){
      cat(paste0("Channels excluded from the analysis: ", paste(ChannelExcludedFM, collapse = ", "), ". \n \n"))
 }
 ```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
+if(!is.null(FlowMarginQC$OutOfRange)){
+     cat("Warning! Some values were found to be out of range from the upper limit!
+         Here is a summary table: ")
+}
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+if(!is.null(FlowMarginQC$OutOfRange)){
+  print(FlowMarginQC$OutOfRange, row.names = FALSE) 
+}
+```
+
