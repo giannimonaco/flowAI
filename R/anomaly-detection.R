@@ -37,8 +37,8 @@
 
 anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, use_decomp = TRUE, period=1, verbose = FALSE){
       
-    idNOzero <- which(x != 0)
-    x <- x[idNOzero]
+  # idNOzero <- which(x != 0)
+  # x <- x[idNOzero]
     
     # Check for supported inputs types
     if(is.vector(x) && is.numeric(x)) {
@@ -71,17 +71,19 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
 
     ############## -- Main analysis: Perform C-H-ESD -- #################
     # -- Step 1: Decompose data. This will return two more components: trend and cycle   
-    if(use_decomp){
-        x_cf <- cffilter(x)
-        #med_t <- trunc(median(x_cf$trend))
-        med_t <- trunc(median(x))
-        sign_n <- sign(x_cf$trend - med_t)
-        sign_n[which(sign_n == 0)] <-1
-        # add the absolute values of the cycle component to the absolute values of the centered trend component. The signs are then added again 
-        x_2 <- as.vector(trunc(abs(x - med_t) + abs(x_cf$cycle)) * sign_n)
-    } else {
-        x_2 <- as.vector(x - median(x))
-    }
+  if(use_decomp){
+    x_cf <- cffilter(x)
+    med_t <- trunc(median(x_cf$trend))
+    #med_t <- trunc(median(x))
+    sign_n <- sign(x_cf$trend - med_t)
+    sign_n[which(sign_n == 0)] <-1
+    # add the absolute values of the cycle component to the absolute values of the centered trend component. The signs are then added again 
+    x_2 <- as.vector(trunc(abs(x - med_t) + abs(x_cf$cycle)) * sign_n)
+    trend <- x_cf$trend
+  } else {
+    x_2 <- as.vector(x - median(x))
+    trend <- x
+  }
     
     anomaly_direction = switch(direction,
         "pos" = data.frame(one_tail=TRUE, upper_tail=TRUE), # upper-tail only (positive going anomalies)
@@ -90,7 +92,7 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
     
 
     n <- length(x_2)
-    data_det <- data.frame(index = idNOzero, values = x_2, or_values = x)
+    data_det <- data.frame(index = 1:length(x), values = x_2, or_values = trend)
     # Maximum number of outliers that C-H-ESD can detect (e.g. 49% of data)
     max_outliers <- trunc(n*max_anoms)
     func_ma <- match.fun(median)
@@ -147,7 +149,7 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
     
     if(num_anoms > 0) {
         R_idx <- R_idx[1L:num_anoms]
-        all_data <- data.frame(index = idNOzero, anoms = x)
+        all_data <- data.frame(index = 1:length(x), anoms = x)
         anoms_data <- subset(all_data, (all_data[[1]] %in% R_idx))
     } else {
         anoms_data <- NULL
