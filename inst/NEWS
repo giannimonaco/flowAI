@@ -21,3 +21,6 @@
 
 1.18.0:
 - add compatibility with LMD data files
+
+1.21.6:
+- the flow rate check is less sensitive now. Note that the default value of alphaFR is now 0.1 instead of 0.01 

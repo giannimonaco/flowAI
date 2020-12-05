@@ -31,7 +31,7 @@
 #'   the analysis the fraction used by default is 0.1, corresponding to 1/10 of
 #'   a second.
 #' @param alphaFR The level of statistical significance used to accept anomalies
-#'   detected by the ESD method. The default value is \code{0.01}.
+#'   detected by the ESD method. The default value is \code{0.1}.
 #' @param decompFR Logical indicating whether the flow rate should be decomposed
 #'   in the trend and cyclical components. Default is \code{TRUE} and the ESD
 #'   outlier detection will be executed on the trend component penalized by the
@@ -123,7 +123,7 @@
 #' @importFrom utils write.table
 #' @export
 flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
-     timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
+     timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.1, decompFR = TRUE,
      ChExcludeFS = c("FSC", "SSC"), outlier_binsFS = FALSE, pen_valueFS = 500,
      max_cptFS = 3, ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
      html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE,

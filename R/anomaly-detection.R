@@ -96,7 +96,7 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
     # Maximum number of outliers that C-H-ESD can detect (e.g. 49% of data)
     max_outliers <- trunc(n*max_anoms)
     func_ma <- match.fun(median)
-    func_sigma <- match.fun(mad)
+    func_sigma <- match.fun(IQR) # Note that I changed from mad to IQR to make it less sensible
     R_idx <- 1L:max_outliers
     num_anoms <- 0L
     one_tail <- anomaly_direction$one_tail

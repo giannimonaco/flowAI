@@ -10,7 +10,7 @@ flow_auto_qc(
   output = 1,
   timeCh = NULL,
   second_fractionFR = 0.1,
-  alphaFR = 0.01,
+  alphaFR = 0.1,
   decompFR = TRUE,
   ChExcludeFS = c("FSC", "SSC"),
   outlier_binsFS = FALSE,
@@ -59,7 +59,7 @@ the analysis the fraction used by default is 0.1, corresponding to 1/10 of
 a second.}
 
 \item{alphaFR}{The level of statistical significance used to accept anomalies
-detected by the ESD method. The default value is \code{0.01}.}
+detected by the ESD method. The default value is \code{0.1}.}
 
 \item{decompFR}{Logical indicating whether the flow rate should be decomposed
 in the trend and cyclical components. Default is \code{TRUE} and the ESD
