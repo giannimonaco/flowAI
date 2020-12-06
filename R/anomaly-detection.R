@@ -117,10 +117,8 @@ anomaly_detection = function(x, max_anoms=0.49, direction='both', alpha=0.01, us
         }
         
         
-        data_sigma <- func_sigma(trend)   
-        # the standard deviation has to be calculated from the original 
-        # or the trend distribution because otherwise it would be 
-        # affected too much by the cycle component
+        data_sigma <- func_sigma(ares)   
+        # tbefore it was calculated on the trend or original values. I changed it afterwards
         if(data_sigma == 0) 
             break
         
