@@ -55,7 +55,7 @@ addQC <- function(QCvector, remove_from, sub_exprs, params, keyval){
     flowCorePnRmax <- paste0("flowCore_$P", NN, "Rmax")
     flowCorePnRmin <- paste0("flowCore_$P", NN, "Rmin")
     o <- params@data
-    o[length(o[,1]) + 1,] <- c(paste0("remove_from_", remove_from), "QC", as.numeric(keyval$`$P1R`), 0, 20000)
+    o[length(o[,1]) + 1,] <- list(paste0("remove_from_", remove_from), "QC", as.numeric(keyval$`$P1R`), 0, 20000)
     rownames(o)[length(o[,1])] <- paste("$P", NN, sep = "")
     
     outFCS <- new("flowFrame", exprs=sub_exprs, parameters=new("AnnotatedDataFrame",o), description=keyval)
