@@ -149,7 +149,8 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
   }else if(is(fcsfiles,"flowFrame")){
     FileType <- "FCS"
     set <- as(fcsfiles,"flowSet")
-    names <- identifier(fcsfiles)
+    names <- flowCore::identifier(fcsfiles)
+    flowCore::sampleNames(set) <- names
   }else{
    stop("As first argument, use a flowSet or a character vector with the path of the FCS files")
   }
