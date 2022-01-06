@@ -10,6 +10,7 @@ flow_auto_qc(
   output = 1,
   timeCh = NULL,
   second_fractionFR = 0.1,
+  deviationFR = "MAD",
   alphaFR = 0.01,
   decompFR = TRUE,
   ChExcludeFS = c("FSC", "SSC"),
@@ -58,8 +59,12 @@ the timestep corresponds to 0.01, however, to shorten the running time of
 the analysis the fraction used by default is 0.1, corresponding to 1/10 of
 a second.}
 
+\item{deviationFR}{The metrics used to calculate the dispersion of a flow rate
+fluctuation. Choose between MAD and IQR. Default is MAD and it is more sensitive.}
+
 \item{alphaFR}{The level of statistical significance used to accept anomalies
-detected by the ESD method. The default value is \code{0.01}.}
+detected by the ESD method. The default value is \code{0.01}.
+Decrease the value to make the flow rate check less sensitive.}
 
 \item{decompFR}{Logical indicating whether the flow rate should be decomposed
 in the trend and cyclical components. Default is \code{TRUE} and the ESD

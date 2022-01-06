@@ -30,8 +30,11 @@
 #'   the timestep corresponds to 0.01, however, to shorten the running time of
 #'   the analysis the fraction used by default is 0.1, corresponding to 1/10 of
 #'   a second.
+#' @param deviationFR The metrics used to calculate the dispersion of a flow rate
+#'   fluctuation. Choose between MAD and IQR. Default is MAD and it is more sensitive.
 #' @param alphaFR The level of statistical significance used to accept anomalies
 #'   detected by the ESD method. The default value is \code{0.01}.
+#'   Decrease the value to make the flow rate check less sensitive.
 #' @param decompFR Logical indicating whether the flow rate should be decomposed
 #'   in the trend and cyclical components. Default is \code{TRUE} and the ESD
 #'   outlier detection will be executed on the trend component penalized by the
@@ -123,9 +126,10 @@
 #' @importFrom utils write.table
 #' @export
 flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
-     timeCh = NULL, second_fractionFR = 0.1, alphaFR = 0.01, decompFR = TRUE,
-     ChExcludeFS = c("FSC", "SSC"), outlier_binsFS = FALSE, pen_valueFS = 500,
-     max_cptFS = 3, ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
+     timeCh = NULL, second_fractionFR = 0.1, deviationFR = "MAD",
+     alphaFR = 0.01, decompFR = TRUE, ChExcludeFS = c("FSC", "SSC"),
+     outlier_binsFS = FALSE, pen_valueFS = 500, max_cptFS = 3,
+     ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
      html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE,
      fcs_lowQ = FALSE, folder_results = "resultsQC") {
 
@@ -139,7 +143,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
     else if(FileType == "LMD"){
       set <- read.flowSet(files = fcsfiles, dataset = 2, truncate_max_range = FALSE)
     }else{
-      set <- read.flowSet(files = fcsfiles, truncate_max_range = FALSE) 
+      set <- read.flowSet(files = fcsfiles, truncate_max_range = FALSE)
     }
     names <- fcsfiles
   }else if(is(fcsfiles, "flowSet")){
@@ -249,7 +253,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
     ### Describe here the arguments for the functions of the flow Rate and Flow Signal
     FR_bin_arg <- list( second_fraction = second_fractionFR, timeCh = timeCh,
                   timestep = timestep)
-    FR_QC_arg <- list( alpha = alphaFR, use_decomp = decompFR)
+    FR_QC_arg <- list( alpha = alphaFR, use_decomp = decompFR, deviation = deviationFR)
     FS_bin_arg <- list( binSize = FSbinSize, timeCh = timeCh, timestep = timestep, TimeChCheck = TimeChCheck)
     FS_QC_arg <- list( ChannelExclude = ChExcludeFS, pen_valueFS, max_cptFS, outlier_binsFS )
     FM_QC_arg <- list( ChannelExclude = ChExcludeFM, side= sideFM, neg_values = neg_valuesFM)
@@ -332,7 +336,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
        new_template <- paste0(folder_results, filename, "_template.Rmd")
        file.copy(template_path, new_template)
        # apparently the render function does not work well if there is not a space character in the name of the template
-       if(folder_results != FALSE){  
+       if(folder_results != FALSE){
           rmarkdown::render(new_template, html_document(), output_dir = folder_results, output_file = reportfile, quiet = TRUE )
        }else{
           rmarkdown::render(new_template, html_document(), output_file = reportfile, quiet = TRUE )
