@@ -23,6 +23,10 @@
 #' @param timeCh Character string corresponding to the name of the Time Channel
 #'   in the set of FCS files. By default is \code{NULL} and the name is
 #'   retrieved automatically.
+#' @param timestep Numerical value that specifies the time step in seconds. In
+#'   other words, it tells how many seconds (or parts of a second), one unit of
+#'   time correspond to. By default is \code{NULL} and the value is
+#'   retrieved automatically.
 #' @param second_fractionFR The fraction of a second that is used to split the
 #'   time channel in order to recreate the flow rate. Set it to
 #'   \code{"timestep"} if you wish to recreate the flow rate at the maximum
@@ -126,7 +130,7 @@
 #' @importFrom utils write.table
 #' @export
 flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
-     timeCh = NULL, second_fractionFR = 0.1, deviationFR = "MAD",
+     timeCh = NULL, timestep = NULL,second_fractionFR = 0.1, deviationFR = "MAD",
      alphaFR = 0.01, decompFR = TRUE, ChExcludeFS = c("FSC", "SSC"),
      outlier_binsFS = FALSE, pen_valueFS = 500, max_cptFS = 3,
      ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
@@ -172,7 +176,8 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
   # in some cases, especially if the FCS file has been modified, there
   # could be more than one slots for the Timestep parameter. the first in
   # numerical order should be the original value.
-  word <- which(grepl("TIMESTEP", names(keyword(set[[1]])),
+  if (missing(timestep) || is.null(timestep)) {
+   word <- which(grepl("TIMESTEP", names(keyword(set[[1]])),
                       ignore.case = TRUE))
   timestep <- as.numeric(keyword(set[[1]])[[word[1]]])
   if( !length(timestep) ){
@@ -182,6 +187,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       warning("The TIMESTEP keyword was not found and hence it was set to 0.01. Graphs labels indicating time might not be correct", call. =FALSE)
       timestep <- 0.01
     }
+  }
   }
   if( second_fractionFR == "timestep" ){
       second_fractionFR <- timestep

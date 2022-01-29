@@ -9,6 +9,7 @@ flow_auto_qc(
   remove_from = "all",
   output = 1,
   timeCh = NULL,
+  timestep = NULL,
   second_fractionFR = 0.1,
   deviationFR = "MAD",
   alphaFR = 0.01,
@@ -49,6 +50,11 @@ Set it to any other value if no R object has to be returned. Default is
 
 \item{timeCh}{Character string corresponding to the name of the Time Channel
 in the set of FCS files. By default is \code{NULL} and the name is
+retrieved automatically.}
+
+\item{timestep}{Numerical value that specifies the time step in seconds. In
+other words, it tells how many seconds (or parts of a second), one unit of
+time correspond to. By default is \code{NULL} and the value is
 retrieved automatically.}
 
 \item{second_fractionFR}{The fraction of a second that is used to split the
