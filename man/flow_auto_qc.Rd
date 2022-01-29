@@ -53,8 +53,8 @@ in the set of FCS files. By default is \code{NULL} and the name is
 retrieved automatically.}
 
 \item{timestep}{Numerical value that specifies the time step in seconds. In
-other words, it tells how many seconds (or parts of a second), one unit of
-time correspond to. By default is \code{NULL} and the value is
+other words, it tells how many seconds one unit of
+time corresponds to. By default is \code{NULL} and the value is
 retrieved automatically.}
 
 \item{second_fractionFR}{The fraction of a second that is used to split the
