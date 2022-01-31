@@ -46,7 +46,7 @@ addQC <- function(QCvector, remove_from, sub_exprs, params, keyval){
     sub_exprs <- cbind(sub_exprs, QCvector)
     attr(sub_exprs, "ranges") <- rs
     NN <- as.numeric(keyval["$PAR"]) + 1
-    names(dimnames(sub_exprs)[[2]]) <- sprintf("$P%sN", 1:NN)
+    names(dimnames(sub_exprs)[[2]])[dim(sub_exprs)[2]] <- paste0("$P",NN, "N")
     pnr <- paste0("$P", NN, "R")
     pnb <- paste0("$P", NN, "B")
     pne <- paste0("$P", NN, "E")
@@ -55,12 +55,12 @@ addQC <- function(QCvector, remove_from, sub_exprs, params, keyval){
     flowCorePnRmax <- paste0("flowCore_$P", NN, "Rmax")
     flowCorePnRmin <- paste0("flowCore_$P", NN, "Rmin")
     o <- params@data
-    o[length(o[,1]) + 1,] <- list(paste0("remove_from_", remove_from), "QC", as.numeric(keyval$`$P1R`), 0, 20000)
+    o[length(o[,1]) + 1,] <- list(paste0("remove_from_", remove_from), "QC", 20000, 0, 20000)
     rownames(o)[length(o[,1])] <- paste("$P", NN, sep = "")
     
     outFCS <- new("flowFrame", exprs=sub_exprs, parameters=new("AnnotatedDataFrame",o), description=keyval)
-    keyword(outFCS)[pnr] <- max(20000, keyword(outFCS)$`$P1R`)
-    keyword(outFCS)[pnb] <- keyword(outFCS)$`$P1B`
+    keyword(outFCS)[pnr] <- "20000"
+    keyword(outFCS)[pnb] <- "32"   # keyword(outFCS)$`$P1B`
     keyword(outFCS)[pne] <- "0,0"
     keyword(outFCS)[pnn] <- paste0("remove_from_", remove_from)
     keyword(outFCS)[pns] <- "QC"
