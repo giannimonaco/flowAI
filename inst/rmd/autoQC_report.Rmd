@@ -67,7 +67,7 @@ cat("It was not possible to analyze the flow rate since the time channel contain
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, results = 'asis'}
   if (outlier_binsFS) { 
-        cat(paste0("Outliers were removed before the changepoint analysis.", FlowSignalQC$Perc_bad_cells$badPerc_out * 100, "% of anomalies were detected as outliers and ", FlowSignalQC$Perc_bad_cells$badPerc_cp *100, " of anomalies were detected in the changepoint analysis. \n"))
+        cat(paste0("From the total amount of anomalies found in the signal acquisition check,  ", FlowSignalQC$Perc_bad_cells$badPerc_out * 100, "% were detected as outliers. Outliers were set to median bin values before the changepoint analysis and later flagged as anomalies. \n"))
    }
 ```
 

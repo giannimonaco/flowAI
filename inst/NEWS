@@ -24,3 +24,6 @@
 
 1.25.3:
 - Added option to use IQR to make the flow rate check less sensitive.
+
+1.26.0:
+- Added the argument deviationFR to choose between MAD and IQR in the flow rate check.

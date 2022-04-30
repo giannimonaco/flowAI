@@ -82,12 +82,12 @@ flow_signal_check <- function(x, FlowSignalData, ChannelExclude = NULL,
         x[FS_out] <- med
         return(x)
       })
-      badPerc_out <- round((length(FS_out)/nrow(fs_res)),4)
+     # badPerc_out <- round((length(FS_out)/nrow(fs_res)),4)
      # cat(paste0(badPerc_out * 100, "% of outliers found in channels' signal. \n"))
     }else{
       fs_res_adj <- fs_res[,parms]
     #  cat("0% of outliers found in channels' signal. \n")
-      badPerc_out <- 0
+     # badPerc_out <- 0
     }
 
   cpt_res <- suppressWarnings(cpt.meanvar(t(fs_res_adj),
@@ -142,18 +142,22 @@ flow_signal_check <- function(x, FlowSignalData, ChannelExclude = NULL,
     colnames(tab_cpt) <- 1:length(tab_cpt[1, ])
   }
   # percentage bad cell detected with the changepoint method
-  badPerc_cp <- round(1 - ((max_seg[2] - max_seg[1])/(length(fs_res[, 1]) - 1)),4)
-
-  cat(paste0(100 * badPerc_cp, "% of anomalous cells detected in signal acquisition check. \n"))
-
+  # badPerc_cp <- round(1 - ((max_seg[2] - max_seg[1])/(length(fs_res[, 1]) - 1)),4)
+  
   # retrieve ID of good cells
   if(outlier_remove){
-    fs_cellBinID <- fs_cellBinID[which(!fs_cellBinID[, 2] %in% FS_out),]
+    fs_cellBinID2 <- fs_cellBinID[which(!fs_cellBinID[, 2] %in% FS_out),]
+    badPerc_out <- round(1 - nrow(fs_cellBinID2)/nrow(fs_cellBinID),4)
+    goodCellIDs <- fs_cellBinID2[which(fs_cellBinID2[, 2] >= max_seg[1] &
+                                         fs_cellBinID2[, 2] <= max_seg[2]), 1]
+    badPerc_tot <- round(1 - length(goodCellIDs)/nrow(fs_cellBinID),4)
+  }else{
+    goodCellIDs <- fs_cellBinID[which(fs_cellBinID[, 2] >= max_seg[1] &
+                                        fs_cellBinID[, 2] <= max_seg[2]), 1]
+    badPerc_tot <- round(1 - length(goodCellIDs)/nrow(fs_cellBinID),4)
   }
-  goodCellIDs <- fs_cellBinID[which(fs_cellBinID[, 2] >= max_seg[1] &
-      fs_cellBinID[, 2] <= max_seg[2]), 1]
-
-  badPerc_tot <- round(1 - length(goodCellIDs)/nrow(fs_cellBinID),4)
+  
+  cat(paste0(100 * badPerc_tot, "% of anomalous cells detected in signal acquisition check. \n"))
 
   params <- parameters(x)
   keyval <- keyword(x)
@@ -161,7 +165,7 @@ flow_signal_check <- function(x, FlowSignalData, ChannelExclude = NULL,
   sub_exprs <- sub_exprs[goodCellIDs, ]  ## check if the Id Correspond!
   newx <- flowFrame(exprs = sub_exprs, parameters = params, description = keyval)
 
-  return(list(FSnewFCS = newx, exprsBin = FlowSignalData$exprsBin, Perc_bad_cells = data.frame(badPerc_tot,badPerc_cp, badPerc_out),
+  return(list(FSnewFCS = newx, exprsBin = FlowSignalData$exprsBin, Perc_bad_cells = data.frame(badPerc_tot,badPerc_out),
         goodCellIDs = goodCellIDs, tab_cpt = tab_cpt, ch_no_cpt =ch_no_cpt,
         segm = max_seg, FS_out = FS_out, outlier_remove = outlier_remove))
 }
