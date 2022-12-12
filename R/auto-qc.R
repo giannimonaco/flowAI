@@ -24,9 +24,8 @@
 #'   in the set of FCS files. By default is \code{NULL} and the name is
 #'   retrieved automatically.
 #' @param timestep Numerical value that specifies the time step in seconds. In
-#'   other words, it tells how many seconds one unit of
-#'   time corresponds to. By default is \code{NULL} and the value is
-#'   retrieved automatically.
+#'   other words, it tells how many seconds one unit of time corresponds to. By
+#'   default is \code{NULL} and the value is retrieved automatically.
 #' @param second_fractionFR The fraction of a second that is used to split the
 #'   time channel in order to recreate the flow rate. Set it to
 #'   \code{"timestep"} if you wish to recreate the flow rate at the maximum
@@ -34,11 +33,12 @@
 #'   the timestep corresponds to 0.01, however, to shorten the running time of
 #'   the analysis the fraction used by default is 0.1, corresponding to 1/10 of
 #'   a second.
-#' @param deviationFR The metrics used to calculate the dispersion of a flow rate
-#'   fluctuation. Choose between MAD and IQR. Default is MAD and it is more sensitive.
+#' @param deviationFR The metrics used to calculate the dispersion of a flow
+#'   rate fluctuation. Choose between MAD and IQR. Default is MAD and it is more
+#'   sensitive.
 #' @param alphaFR The level of statistical significance used to accept anomalies
-#'   detected by the ESD method. The default value is \code{0.01}.
-#'   Decrease the value to make the flow rate check less sensitive.
+#'   detected by the ESD method. The default value is \code{0.01}. Decrease the
+#'   value to make the flow rate check less sensitive.
 #' @param decompFR Logical indicating whether the flow rate should be decomposed
 #'   in the trend and cyclical components. Default is \code{TRUE} and the ESD
 #'   outlier detection will be executed on the trend component penalized by the
@@ -90,6 +90,9 @@
 #' @param folder_results Character string used to name the directory that
 #'   contains the results. The default is \code{"resultsQC"}. If you intend to
 #'   return the results in the working directory use \code{FALSE}.
+#' @param ... additional parameters passed to
+#'   \code{\link{flowCore::read.flowSet()}} to provide flexibility over how the
+#'   FCS files are read in.
 #' @return A complete quality control is performed on flow cytometry data in FCS
 #'   format. By default the analysis returns:
 #'
@@ -135,7 +138,7 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
      outlier_binsFS = FALSE, pen_valueFS = 500, max_cptFS = 3,
      ChExcludeFM = c("FSC", "SSC"), sideFM = "both", neg_valuesFM = 1,
      html_report = "_QC", mini_report = "QCmini", fcs_QC = "_QC", fcs_highQ = FALSE,
-     fcs_lowQ = FALSE, folder_results = "resultsQC") {
+     fcs_lowQ = FALSE, folder_results = "resultsQC", ...) {
 
     ## load the data
   if( is.character(fcsfiles) ){
@@ -145,9 +148,9 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       FileType <- "FCS"
     }
     else if(FileType == "LMD"){
-      set <- read.flowSet(files = fcsfiles, dataset = 2, truncate_max_range = FALSE)
+      set <- read.flowSet(files = fcsfiles, dataset = 2, truncate_max_range = FALSE, ...)
     }else{
-      set <- read.flowSet(files = fcsfiles, truncate_max_range = FALSE)
+      set <- read.flowSet(files = fcsfiles, truncate_max_range = FALSE, ...)
     }
     names <- fcsfiles
   }else if(is(fcsfiles, "flowSet")){
