@@ -26,7 +26,8 @@ flow_auto_qc(
   fcs_QC = "_QC",
   fcs_highQ = FALSE,
   fcs_lowQ = FALSE,
-  folder_results = "resultsQC"
+  folder_results = "resultsQC",
+  ...
 )
 }
 \arguments{
@@ -53,9 +54,8 @@ in the set of FCS files. By default is \code{NULL} and the name is
 retrieved automatically.}
 
 \item{timestep}{Numerical value that specifies the time step in seconds. In
-other words, it tells how many seconds one unit of
-time corresponds to. By default is \code{NULL} and the value is
-retrieved automatically.}
+other words, it tells how many seconds one unit of time corresponds to. By
+default is \code{NULL} and the value is retrieved automatically.}
 
 \item{second_fractionFR}{The fraction of a second that is used to split the
 time channel in order to recreate the flow rate. Set it to
@@ -65,12 +65,13 @@ the timestep corresponds to 0.01, however, to shorten the running time of
 the analysis the fraction used by default is 0.1, corresponding to 1/10 of
 a second.}
 
-\item{deviationFR}{The metrics used to calculate the dispersion of a flow rate
-fluctuation. Choose between MAD and IQR. Default is MAD and it is more sensitive.}
+\item{deviationFR}{The metrics used to calculate the dispersion of a flow
+rate fluctuation. Choose between MAD and IQR. Default is MAD and it is more
+sensitive.}
 
 \item{alphaFR}{The level of statistical significance used to accept anomalies
-detected by the ESD method. The default value is \code{0.01}.
-Decrease the value to make the flow rate check less sensitive.}
+detected by the ESD method. The default value is \code{0.01}. Decrease the
+value to make the flow rate check less sensitive.}
 
 \item{decompFR}{Logical indicating whether the flow rate should be decomposed
 in the trend and cyclical components. Default is \code{TRUE} and the ESD
@@ -136,6 +137,10 @@ only the events that did not pass the quality control. The default is
 \item{folder_results}{Character string used to name the directory that
 contains the results. The default is \code{"resultsQC"}. If you intend to
 return the results in the working directory use \code{FALSE}.}
+
+\item{...}{additional parameters passed to
+\code{\link{flowCore::read.flowSet()}} to provide flexibility over how the
+FCS files are read in.}
 }
 \value{
 A complete quality control is performed on flow cytometry data in FCS
