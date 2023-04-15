@@ -310,7 +310,9 @@ flow_auto_qc <- function(fcsfiles, remove_from = "all", output = 1,
       params <- parameters(ordFCS)
       keyval <- keyword(ordFCS)
       if (fcs_highQ != FALSE || output == 1) {
-          goodfcs <- flowFrame(exprs = sub_exprs[goodCellIDs, ], parameters = params, description = keyval)
+        check_goodcellsID(goodCellIDs)  
+        goodfcs <- flowFrame(exprs = sub_exprs[goodCellIDs, , drop = FALSE], 
+                               parameters = params, description = keyval)
          if (fcs_highQ != FALSE) {suppressWarnings(write.FCS(goodfcs, good.fcs.file)) }
       }
       if (fcs_QC != FALSE || output == 2 ){

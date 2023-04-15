@@ -162,7 +162,8 @@ flow_signal_check <- function(x, FlowSignalData, ChannelExclude = NULL,
   params <- parameters(x)
   keyval <- keyword(x)
   sub_exprs <- exprs(x)
-  sub_exprs <- sub_exprs[goodCellIDs, ]  ## check if the Id Correspond!
+  check_goodcellsID(goodCellIDs)
+  sub_exprs <- sub_exprs[goodCellIDs, , drop = FALSE]  ## check if the Id Correspond!
   newx <- flowFrame(exprs = sub_exprs, parameters = params, description = keyval)
 
   return(list(FSnewFCS = newx, exprsBin = FlowSignalData$exprsBin, Perc_bad_cells = data.frame(badPerc_tot,badPerc_out),

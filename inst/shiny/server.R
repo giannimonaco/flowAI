@@ -228,10 +228,12 @@ shinyServer(function(input, output, session) {
         keyval <- keyword(ordFCS)
         sub_exprs <- exprs(ordFCS)
 
-        good_sub_exprs <- sub_exprs[goodCellIDs, ]
+        check_goodcellsID(goodCellIDs)
+        good_sub_exprs <- sub_exprs[goodCellIDs, , drop = FALSE]
         goodfcs <- flowFrame(exprs = good_sub_exprs, parameters = params, description = keyval)
 
-        bad_sub_exprs <- sub_exprs[badCellIDs, ]
+        check_badCellIDs(badCellIDs)
+        bad_sub_exprs <- sub_exprs[badCellIDs, , drop = FALSE]
         badfcs <- flowFrame(exprs = bad_sub_exprs, parameters = params,description = keyval)
 
         tempQCvector <- cellCheck()[[2]]

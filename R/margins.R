@@ -111,7 +111,8 @@ flow_margin_check <- function(x,  ChannelExclude = NULL,
   params <- parameters(x)
   keyval <- keyword(x)
   sub_exprs <- exprs(x)
-  sub_exprs <- sub_exprs[goodCellIDs, ]
+  check_goodcellsID(goodCellIDs)
+  sub_exprs <- sub_exprs[goodCellIDs, , drop = FALSE]
   newx <- flowFrame(exprs = sub_exprs, parameters = params,
           description = keyval)
 
