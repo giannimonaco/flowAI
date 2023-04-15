@@ -63,7 +63,8 @@ flow_rate_check <- function(x, FlowRateData, alpha = alpha, use_decomp = use_dec
     params <- parameters(x)
     keyval <- keyword(x)
     sub_exprs <- exprs(x)
-    sub_exprs <- sub_exprs[goodCellIDs, ]
+    check_goodcellsID(goodCellIDs)
+    sub_exprs <- sub_exprs[goodCellIDs, , drop = FALSE]
     newx <- flowFrame(exprs = sub_exprs, parameters = params, description = keyval)
   }
   cat(paste0(100 * badPerc, "% of anomalous cells detected in the flow rate check. \n"))
